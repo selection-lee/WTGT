@@ -1,4 +1,4 @@
-package com.pokeypokey.temp.global.utils;
+package com.ssafy.wattagatta.global.utils;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

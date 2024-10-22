@@ -1,8 +1,8 @@
-package com.pokeypokey.temp.global.handler;
+package com.ssafy.wattagatta.global.handler;
 
-import static com.pokeypokey.temp.global.utils.ApiUtils.error;
+import static com.ssafy.wattagatta.global.utils.ApiUtils.error;
 
-import com.pokeypokey.temp.global.utils.ApiUtils.ApiResult;
+import com.ssafy.wattagatta.global.utils.ApiUtils.ApiResult;
 import jakarta.validation.ConstraintViolationException;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;

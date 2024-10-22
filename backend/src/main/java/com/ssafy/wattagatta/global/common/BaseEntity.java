@@ -1,4 +1,4 @@
-package com.pokeypokey.temp.global.common;
+package com.ssafy.wattagatta.global.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;

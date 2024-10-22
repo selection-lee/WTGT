@@ -1,4 +1,4 @@
-package com.pokeypokey.temp.global.config;
+package com.ssafy.wattagatta.global.config;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +33,7 @@ public class SecurityConfig {
                 )
                 .build();
     }
+
     private CorsConfigurationSource apiConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("*"));
