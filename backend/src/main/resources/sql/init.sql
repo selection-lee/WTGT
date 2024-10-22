@@ -1,8 +1,6 @@
 CREATE TABLE `BaseEntity` (
-    `created_at`	datetime	    NULL,
-    `created_by`	varchar(100)	NULL,
-    `updated_at`	datetime	    NULL,
-    `updated_by`	varchar(100)	NULL
+    `created_at`    datetime    NULL,
+    `updated_at`	datetime    NULL
 );
 
 CREATE TABLE `Member` (
@@ -60,28 +58,28 @@ CREATE TABLE `Invoice` (
 );
 
 CREATE TABLE `recipient` (
-    `recipient_id`	int	NOT NULL,
-    `name`	varchar(100)	NULL,
-    `email`	varchar(100)	NULL,
-    `phone`	varchar(100)	NULL,
-    `address`	varchar(100)	NULL
+    `recipient_id`	int	            NOT NULL,
+    `name`	        varchar(100)	NULL,
+    `email`	        varchar(100)	NULL,
+    `phone`	        varchar(100)	NULL,
+    `address`	    varchar(100)	NULL
 );
 
 CREATE TABLE `sender` (
-    `sender_id`	int	NOT NULL,
-    `name`	varchar(100)	NULL,
-    `email`	varchar(100)	NULL,
-    `phone`	varchar(100)	NULL,
+    `sender_id`	int	            NOT NULL,
+    `name`	    varchar(100)	NULL,
+    `email`	    varchar(100)	NULL,
+    `phone`	    varchar(100)	NULL,
     `address`	varchar(100)	NULL
 );
 
 CREATE TABLE `EventLog` (
-    `event_id`	bigint	NOT NULL,
-    `event_type`	varchar(100)	NOT NULL,
-    `event_description`	text	NULL,
-    `related_entity_id`	int	NULL,
+    `event_id`	            bigint	        NOT NULL,
+    `event_type`	        varchar(100)	NOT NULL,
+    `event_description`	    text	        NULL,
+    `related_entity_id`	    int	            NULL,
     `related_entity_type`	varchar(100)	NOT NULL,
-    `additional_info`	text	NULL
+    `additional_info`	    text	        NULL
 );
 
 ALTER TABLE `Member`
