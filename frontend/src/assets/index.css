@@ -1,0 +1,44 @@
+/* src/assets/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Inter 폰트 설정 */
+@import url('https://rsms.me/inter/inter.css');
+
+/*  */
+:root { 
+  font-family: 'Inter', sans-serif; 
+}
+
+@supports (font-variation-settings: normal) {
+  :root { 
+    font-family: 'Inter var', sans-serif; 
+  }
+}
+
+/* 공통 스타일 */
+@layer base {
+  body {
+    @apply bg-black text-slate-300;
+  }
+  
+  h1 {
+    @apply text-2xl font-bold;
+  }
+  
+  h2 {
+    @apply text-xl font-bold;
+  }
+}
+
+/* 컴포넌트 스타일 */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg transition-colors;
+  }
+  
+  .card {
+    @apply bg-white/10 rounded-lg p-4;
+  }
+}
