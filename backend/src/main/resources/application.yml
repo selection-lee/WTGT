@@ -8,5 +8,11 @@ spring:
     username: root
     password: 1234
 
-server:
-  port: 80
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+    show-sql: true
