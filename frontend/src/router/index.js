@@ -4,6 +4,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 // 메인 레이아웃과 페이지 컴포넌트들 import
 import DashboardLayout from '@/components/layout/DashboardLayout.vue'
 import DashboardView from '@/views/Dashboard/DashboardView.vue'
+import RCcarView from '@/views/RC_car/RCcarView.vue' // RC 카 페이지 컴포넌트
+
 import UserSection from '@/views/Dashboard/UserSection.vue'
 import IncomeSection from '@/views/Dashboard/IncomeSection.vue'
 
@@ -18,14 +20,29 @@ const routes = [
         component: DashboardView,
       },
       {
-        path: 'users',
-        name: 'users',
+        path: 'rc_car',
+        name: 'rc_car',
+        component: RCcarView,  
+      },
+      {
+        path: 'monitoring',
+        name: 'monitoring',
         component: UserSection  
       },
       {
-        path: 'invoices',
-        name: 'invoices',
+        path: 'order',
+        name: 'order',
+        component: UserSection  
+      },
+      {
+        path: 'statistics',
+        name: 'statistics',
         component: IncomeSection
+      },
+      {
+        path: 'users',
+        name: 'users',
+        component: UserSection  
       },
     //   {
     //     path: 'settings',

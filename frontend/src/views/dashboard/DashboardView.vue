@@ -1,6 +1,7 @@
  <!-- views/Dashboard/DashboardView.vue -->
 <template>
   <div>
+    <!--시뮬레이터 영상-->
     <StatisticsSection />
     <IncomeSection />
     <UserSection />

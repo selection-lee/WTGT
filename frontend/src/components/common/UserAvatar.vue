@@ -2,7 +2,7 @@
 <template>
   <div class="inline-flex space-x-3 items-center">
     <img 
-      :src="image" 
+      :src="image"
       :alt="name"
       class="rounded-full object-cover"
       :class="sizeClasses[size]"
