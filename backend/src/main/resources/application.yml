@@ -1,13 +1,14 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
-    name: wattagatta
+    name: ${MYSQL_DATABASE}
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/wattagatta?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: 1234
-
+    url: jdbc:mysql://mysql/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,3 +17,6 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
     show-sql: true
+  redis:
+    host: redis
+    port: 6379
