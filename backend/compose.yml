@@ -30,7 +30,7 @@ services: # 실행하 ㄹ서비스들 정의
       interval: 5s # 안되면 5초에 한 번씩 10번 시도
       retries: 10
     volumes:
-      - ./mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql # 가상 볼륨으로 변경
   redis:
     container_name: redis
     image: redis
@@ -40,3 +40,6 @@ services: # 실행하 ㄹ서비스들 정의
       test: [ "CMD", "redis-cli", "ping" ] # redis-cli로 redis 서버 응답 확인
       interval: 5s
       retries: 10
+volumes: # 가상 볼륨 생성해서 쓰는 게 안전
+  mysql_data: 
+    name: mysql_data
