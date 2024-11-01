@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['invoice']
+
+roboflow:
+  workspace: market-o6csq
+  project: invoice-smq5x
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/market-o6csq/invoice-smq5x/dataset/2
