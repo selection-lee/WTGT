@@ -13,27 +13,21 @@
 <script>
 import {
   HomeIcon,
-  DocumentIcon,
+  ShoppingCartIcon,
+  ComputerDesktopIcon,
+  ClipboardDocumentListIcon,
+  ChartBarSquareIcon,
   UserIcon,
-  CogIcon,
-  ArrowUpRightIcon,
-  InformationCircleIcon,
-  PencilIcon,
-  KeyIcon,
-  NoSymbolIcon
 } from '@heroicons/vue/24/outline'
 
 // 컴포넌트 매핑
 const ICON_COMPONENTS = {
   HomeIcon,
-  DocumentIcon,
+  ShoppingCartIcon,
+  ComputerDesktopIcon,
+  ClipboardDocumentListIcon,
+  ChartBarSquareIcon,
   UserIcon,
-  CogIcon,
-  ArrowUpRightIcon,
-  InformationCircleIcon,
-  PencilIcon,
-  KeyIcon,
-  NoSymbolIcon
 }
 
 export default {
