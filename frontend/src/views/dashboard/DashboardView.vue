@@ -2,7 +2,7 @@
 <template>
   <div>
     <!--시뮬레이터 영상-->
-
+    <span></span>
     <StatisticsSection />
     <IncomeSection />
     <UserSection />

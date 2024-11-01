@@ -5,6 +5,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import DashboardLayout from '@/components/layout/DashboardLayout.vue'
 import DashboardView from '@/views/Dashboard/DashboardView.vue'
 import RCcarView from '@/views/RC_car/RCcarView.vue' // RC 카 페이지 컴포넌트
+import LoginView from '@/views/Auth/LoginView.vue'
 
 import UserSection from '@/views/Dashboard/UserSection.vue'
 import IncomeSection from '@/views/Dashboard/IncomeSection.vue'
@@ -57,6 +58,15 @@ const routes = [
 //     name: 'not-found',
 //     component: () => import('@/views/NotFound.vue')  // 404 페이지
 //   }
+  {
+    // 로그인 페이지
+    path: '/login',
+    name: 'login',
+    component: LoginView,
+    meta: {
+      requiresAuth: false
+    }
+  }
 ]
 
 const router = createRouter({
@@ -66,11 +76,23 @@ const router = createRouter({
 
 // 필요한 경우 네비게이션 가드 추가
 router.beforeEach((to, from, next) => {
-  // 예: 인증이 필요한 경우
-  // const isAuthenticated = localStorage.getItem('token')
-  // if (to.name !== 'login' && !isAuthenticated) next({ name: 'login' })
-  // else next()
-  next()
+  // // 예: 인증이 필요한 경우
+  // // const isAuthenticated = localStorage.getItem('token')
+  // // if (to.name !== 'login' && !isAuthenticated) next({ name: 'login' })
+  // // else next()
+  // next()
+
+  // 네비게이션 가드 
+  const token = localStorage.getItem('token')
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth !== false)
+
+  if (requiresAuth && !token) {
+    next('/login')
+  } else if (token && to.path === '/login') {
+    next('/')
+  } else {
+    next()
+  }
 })
 
 export default router
