@@ -33,10 +33,21 @@
                 <div class="bg-gray-950 p-4 rounded-lg w-2/3">
                     <h3 class="text-lg font-semibold mb-2">MAP</h3>
                     <div class="relative w-full h-64">
-                        <!--맵 수정필요-->
-                        <div class="grid grid-cols-8 grid-rows-8" style="width: 400px; height: 400px;">
-                            <div v-for="i in 64" :key="i" class="border border-white" style="width: 50px; height: 50px;"></div>
+                        <!--맵-->
+                        <div class="relative" style="width: 300px; height: 300px; left: 90px;">
+                            <!-- 세로 선 -->
+                            <div v-for="i in 9" :key="'v'+i" 
+                                class="absolute bg-white"
+                                :style="{ left: (i * 30) + 'px', top: 0, width: '1px', height: '100%' }">
+                            </div>
+
+                            <!-- 가로 선 -->
+                            <div v-for="i in 9" :key="'h'+i" 
+                                class="absolute bg-white"
+                                :style="{ top: (i * 30) + 'px', left: 0, height: '1px', width: '100%' }">
+                            </div>
                         </div>
+
                         <div
                             v-for="bot in botList"
                             :key="bot.id"
@@ -46,7 +57,7 @@
                         >
                             {{ bot.name }}
                         </div>
-                        <div class="absolute top-5 left-1 bg-green-600 p-1 rounded text-xs">Conveyor Belt</div>
+                        <div class="absolute top-11 left-0 bg-green-600 p-1 rounded text-xs">Conveyor Belt</div>
                     </div>
                 </div>
             </div>
@@ -64,7 +75,7 @@ export default {
     data() {
         return {
             botList: [
-                { id: 1, name: 'Bot 1', status: 'on', statusText: 'On the move', state: 'On the move', battery: 65, position: { x: 50, y: 50 }, color: 'bg-yellow-500' },
+                { id: 1, name: 'Bot 1', status: 'on', statusText: 'On the move', state: 'On the move', battery: 65, position: { x: 110, y: 50 }, color: 'bg-yellow-500' },
                 { id: 2, name: 'Bot 2', status: 'on', statusText: 'On the move', state: 'On the move', battery: 45, position: { x: 200, y: 200 }, color: 'bg-red-500' },
             ]
         }
