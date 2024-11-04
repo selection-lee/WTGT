@@ -81,6 +81,10 @@ router.beforeEach((to, from, next) => {
   // // if (to.name !== 'login' && !isAuthenticated) next({ name: 'login' })
   // // else next()
   // next()
+  // 개발 환경에서 인증 비활성화 확인
+  if (import.meta.env.VITE_DISABLE_AUTH === 'true') {
+    return next()
+  }
 
   // 네비게이션 가드 
   const token = localStorage.getItem('token')
