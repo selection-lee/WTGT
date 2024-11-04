@@ -6,6 +6,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout.vue'
 import DashboardView from '@/views/Dashboard/DashboardView.vue'
 import RCcarView from '@/views/RC_car/RCcarView.vue' // RC 카 페이지 컴포넌트
 import LoginView from '@/views/Auth/LoginView.vue'
+import OrderView from '@/views/Order/OrderView.vue' 
 
 import UserSection from '@/views/Dashboard/UserSection.vue'
 import IncomeSection from '@/views/Dashboard/IncomeSection.vue'
@@ -28,12 +29,12 @@ const routes = [
       {
         path: 'monitoring',
         name: 'monitoring',
-        component: UserSection  
+        component: UserSection
       },
       {
         path: 'order',
         name: 'order',
-        component: UserSection  
+        component: OrderView
       },
       {
         path: 'statistics',
