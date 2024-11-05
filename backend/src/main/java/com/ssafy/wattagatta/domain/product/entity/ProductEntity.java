@@ -1,6 +1,7 @@
 package com.ssafy.wattagatta.domain.product.entity;
 
 import com.ssafy.wattagatta.domain.invoice.entity.InvoiceEntity;
+import com.ssafy.wattagatta.domain.product.response.GetAllProductResponse;
 import com.ssafy.wattagatta.global.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -51,6 +53,9 @@ public class ProductEntity extends BaseEntity {
     @Column(name = "product_location")
     private Integer productLocation;
 
+    @Column(name = "expected_arrival_date")
+    private LocalDate expectedArrivalDate;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity categoryEntity;
@@ -63,4 +68,21 @@ public class ProductEntity extends BaseEntity {
     @JoinColumn(name = "area_id", nullable = false)
     private AreaEntity areaEntity;
 
+
+    public static GetAllProductResponse toResponse(ProductEntity product) {
+        return new GetAllProductResponse(
+                product.getProductId(),
+                product.getProductName(),
+                product.getQuantity(),
+                product.getProductStatus(),
+                product.getUnitPrice(),
+                product.getTotalPrice(),
+                product.getProductSize(),
+                product.getProductLocation(),
+                product.getCategoryEntity() != null ? product.getCategoryEntity().getCategoryName().name() : null,
+                product.getInvoiceEntity() != null ? product.getInvoiceEntity().toString() : null,
+                product.getAreaEntity().getAreaName().name(),
+                product.getExpectedArrivalDate()
+        );
+    }
 }
