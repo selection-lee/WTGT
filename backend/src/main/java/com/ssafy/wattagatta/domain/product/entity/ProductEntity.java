@@ -1,7 +1,7 @@
 package com.ssafy.wattagatta.domain.product.entity;
 
 import com.ssafy.wattagatta.domain.invoice.entity.InvoiceEntity;
-import com.ssafy.wattagatta.domain.product.response.GetAllProductResponse;
+import com.ssafy.wattagatta.domain.product.response.ProductResponse;
 import com.ssafy.wattagatta.global.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -69,8 +69,8 @@ public class ProductEntity extends BaseEntity {
     private AreaEntity areaEntity;
 
 
-    public static GetAllProductResponse toResponse(ProductEntity product) {
-        return new GetAllProductResponse(
+    public static ProductResponse toResponse(ProductEntity product) {
+        return new ProductResponse(
                 product.getProductId(),
                 product.getProductName(),
                 product.getQuantity(),

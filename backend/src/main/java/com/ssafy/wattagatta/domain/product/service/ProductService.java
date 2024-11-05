@@ -2,7 +2,8 @@ package com.ssafy.wattagatta.domain.product.service;
 
 import com.ssafy.wattagatta.domain.product.entity.ProductEntity;
 import com.ssafy.wattagatta.domain.product.repository.ProductRepository;
-import com.ssafy.wattagatta.domain.product.response.GetAllProductResponse;
+import com.ssafy.wattagatta.domain.product.response.ProductResponse;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,8 +14,16 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    public List<GetAllProductResponse> getAllProducts() {
+    public List<ProductResponse> getAllProducts() {
         return productRepository.findAll()
+                .stream()
+                .map(ProductEntity::toResponse)
+                .toList();
+    }
+
+    public List<ProductResponse> getTodayProducts() {
+        LocalDate today = LocalDate.now();
+        return productRepository.findByExpectedArrivalDate(today)
                 .stream()
                 .map(ProductEntity::toResponse)
                 .toList();
