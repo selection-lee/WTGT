@@ -21,9 +21,8 @@ public class ProductService {
                 .toList();
     }
 
-    public List<ProductResponse> getTodayProducts() {
-        LocalDate today = LocalDate.now();
-        return productRepository.findByExpectedArrivalDate(today)
+    public List<ProductResponse> getTodayProducts(LocalDate date) {
+        return productRepository.findByExpectedArrivalDate(date)
                 .stream()
                 .map(ProductEntity::toResponse)
                 .toList();
