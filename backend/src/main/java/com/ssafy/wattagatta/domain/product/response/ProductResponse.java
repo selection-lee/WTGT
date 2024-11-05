@@ -4,7 +4,7 @@ import com.ssafy.wattagatta.domain.product.entity.ProductSize;
 import com.ssafy.wattagatta.domain.product.entity.ProductStatus;
 import java.time.LocalDate;
 
-public record GetAllProductResponse(
+public record ProductResponse(
         Integer productId,
         String productName,
         Integer quantity,
