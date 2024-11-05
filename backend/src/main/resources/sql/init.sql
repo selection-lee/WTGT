@@ -80,7 +80,7 @@ CREATE TABLE `sender`
 CREATE TABLE `Order`
 (
     `order_id`         int          NOT NULL,
-    `invoice_number`   int          NOT NULL,
+    `invoice_number`   varchar(30)  NOT NULL,
     `product_name`     varchar(100) NULL,
     `product_quantity` int          NULL,
     `is_store`         boolean      NOT NULL,
