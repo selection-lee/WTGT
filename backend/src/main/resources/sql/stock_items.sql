@@ -2,21 +2,21 @@ INSERT INTO product (product_name, quantity, product_status, unit_price, total_p
                      invoice_id, area_id, product_location, expected_arrival_date)
 VALUES
 -- 전자제품 (category_id = 1)
-('Laptop', 10, 'PENDING_ARRIVAL', 1000, 10000, 'LARGE', 1, NULL, 1, 1, '2024-12-01'),
+('Laptop', 10, 'PENDING_ARRIVAL', 1000, 10000, 'LARGE', 1, NULL, 1, 1, '2024-11-05'),
 ('Smartphone', 20, 'PENDING_TRANSPORT', 500, 10000, 'SMALL', 1, NULL, 1, 1, '2024-12-02'),
 ('Tablet', 15, 'IN_TRANSIT', 300, 4500, 'SMALL', 1, NULL, 1, 1, '2024-12-03'),
 ('Television', 5, 'LOADED', 1500, 7500, 'LARGE', 1, NULL, 1, 1, '2024-12-04'),
-('Headphones', 25, 'PENDING_ARRIVAL', 200, 5000, 'SMALL', 1, NULL, 1, 1, '2024-12-05'),
+('Headphones', 25, 'PENDING_ARRIVAL', 200, 5000, 'SMALL', 1, NULL, 1, 1, '2024-11-05'),
 
 -- 식품 (category_id = 2)
 ('Bread', 30, 'PENDING_ARRIVAL', 2, 60, 'SMALL', 2, NULL, 2, 2, '2024-12-06'),
 ('Milk', 50, 'PENDING_TRANSPORT', 1, 50, 'SMALL', 2, NULL, 2, 2, '2024-12-07'),
-('Cheese', 25, 'IN_TRANSIT', 5, 125, 'SMALL', 2, NULL, 2, 2, '2024-12-08'),
+('Cheese', 25, 'IN_TRANSIT', 5, 125, 'SMALL', 2, NULL, 2, 2, '2024-11-06'),
 ('Vegetables', 40, 'LOADED', 3, 120, 'SMALL', 2, NULL, 2, 2, '2024-12-09'),
 ('Fruit', 35, 'PENDING_ARRIVAL', 2, 70, 'SMALL', 2, NULL, 2, 2, '2024-12-10'),
 
 -- 가구 (category_id = 3)
-('Sofa', 3, 'PENDING_TRANSPORT', 800, 2400, 'LARGE', 3, NULL, 3, 3, '2024-12-11'),
+('Sofa', 3, 'PENDING_TRANSPORT', 800, 2400, 'LARGE', 3, NULL, 3, 3, '2024-11-07'),
 ('Dining Table', 2, 'IN_TRANSIT', 1200, 2400, 'LARGE', 3, NULL, 3, 3, '2024-12-12'),
 ('Chair', 10, 'LOADED', 100, 1000, 'SMALL', 3, NULL, 3, 3, '2024-12-13'),
 ('Bed', 1, 'PENDING_ARRIVAL', 1500, 1500, 'LARGE', 3, NULL, 3, 3, '2024-12-14'),
