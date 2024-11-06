@@ -15,14 +15,12 @@ public class AgentManager {
 
     private final List<Agent> agents = new ArrayList<>();
 
-    private Agent agent1;
-    private Agent agent2;
-    private final Node agent1Home = new Node(1, 0, Direction.EAST);
-    private final Node agent2Home = new Node(0, 1, Direction.EAST);
+    private Agent agent1 = new Agent();
+    private Agent agent2 = new Agent();
 
     public AgentManager() {
-        agent1.ready("agent1", agent1Home);
-        agent2.ready("agent2", agent2Home);
+        agent1.ready("agent1", new Node(1, 0, Direction.EAST));
+        agent2.ready("agent2", new Node(0, 1, Direction.EAST));
         agents.add(agent1);
         agents.add(agent2);
     }
