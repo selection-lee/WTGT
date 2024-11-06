@@ -2,7 +2,7 @@ package com.ssafy.wattagatta.domain.order.entity;
 
 import com.ssafy.wattagatta.domain.invoice.entity.InvoiceEntity;
 import com.ssafy.wattagatta.domain.member.entity.MemberEntity;
-import com.ssafy.wattagatta.domain.order.request.AddOrderRequest;
+import com.ssafy.wattagatta.domain.order.dto.request.AddOrderRequest;
 import com.ssafy.wattagatta.global.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

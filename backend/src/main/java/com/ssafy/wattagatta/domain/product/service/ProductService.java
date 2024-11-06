@@ -1,8 +1,8 @@
 package com.ssafy.wattagatta.domain.product.service;
 
+import com.ssafy.wattagatta.domain.product.dto.response.ProductResponse;
 import com.ssafy.wattagatta.domain.product.entity.ProductEntity;
 import com.ssafy.wattagatta.domain.product.repository.ProductRepository;
-import com.ssafy.wattagatta.domain.product.response.ProductResponse;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
