@@ -21,7 +21,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Table(name = "member")
+//@Builder // builder 패턴 사용
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+//@AllArgsConstructor // 빌더 패턴 사용하기 위함
 public class MemberEntity extends BaseEntity {
 
     @Id
@@ -42,7 +44,26 @@ public class MemberEntity extends BaseEntity {
     @Column(name = "password", length = 100, nullable = false)
     private String password;
 
+    //    @Builder.Default // 빌더패턴에서 기본값 설정
     @OneToMany(mappedBy = "memberEntity", fetch = FetchType.LAZY)
     private List<OrderEntity> orders = new ArrayList<>();
 
+    // 생성자로 객체 생성
+    public MemberEntity(String username, String nickname, String password, Role role) {
+//        return MemberEntity.builder()
+//                .username(username)
+//                .nickname(nickname)
+//                .password(encodedPassword)
+//                .role(Role.USER)
+//                .build();
+        this.username = username;
+        this.nickname = nickname;
+        this.password = password;
+        this.role = role;
+    }
+
+    // 정적 팩토리 메서드
+    public static MemberEntity createUser(String username, String nickname, String password) {
+        return new MemberEntity(username, nickname, password, Role.USER);
+    }
 }
