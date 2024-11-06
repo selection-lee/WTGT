@@ -1,19 +1,19 @@
-package com.ssafy.wattagatta.domain.rccar.controller;
+package com.ssafy.wattagatta.domain.agent.controller;
 
-import com.ssafy.wattagatta.domain.rccar.response.GridInfoResponse;
-import com.ssafy.wattagatta.domain.rccar.response.RcCarResponse;
+import com.ssafy.wattagatta.domain.agent.dto.response.AgentResponse;
+import com.ssafy.wattagatta.domain.agent.dto.response.GridInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class RcCarController {
+public class AgentController {
 
     @GetMapping("/api/rccar/test")
     public GridInfoResponse testUnity() {
-        RcCarResponse rcCar = new RcCarResponse(21.49, 3.77, 11.94);
-        RcCarResponse rcCar2 = new RcCarResponse(2.0, 3.77, 3.0);
+        AgentResponse rcCar = new AgentResponse(21.49, 3.77, 11.94);
+        AgentResponse rcCar2 = new AgentResponse(2.0, 3.77, 3.0);
         GridInfoResponse coordinates = new GridInfoResponse(rcCar, rcCar2);
         return coordinates;
     }
