@@ -1,4 +1,4 @@
-<!-- src/views/RC_car/RCcarView.vue -->
+<!-- src/views/Order/OrderView.vue -->
 <template>
   <!-- 메인 컨테이너: flex 클래스를 통해 요소들을 수평 배치 -->
   <div class="flex">

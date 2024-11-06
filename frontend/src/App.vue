@@ -1,6 +1,8 @@
 <!-- // src/App.vue -->
 <template>
-  <router-view />
+  <div id="app">
+    <router-view />
+  </div>
 </template>
 
 <script setup>

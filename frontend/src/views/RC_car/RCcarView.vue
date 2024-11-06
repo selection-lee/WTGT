@@ -1,4 +1,3 @@
-<!-- src/views/RC_car/RCcarView.vue -->
 <template>
     <div class="flex">
         <div class="flex-1 p-5 text-white">
@@ -32,7 +31,8 @@
                 <!-- Map -->
                 <div class="bg-gray-950 p-4 rounded-lg w-2/3">
                     <h3 class="text-lg font-semibold mb-2">MAP</h3>
-                    <div class="relative w-full h-64">
+                    <!-- 세로 길이 조정 -->
+                    <div class="relative w-full h-90">
                         <!--맵-->
                         <div class="relative" style="width: 300px; height: 300px; left: 90px;">
                             <!-- 세로 선 -->
@@ -65,6 +65,7 @@
     </div>
 </template>
 
+
 <script>
 import Sidebar from '../../components/layout/Sidebar.vue'
 
@@ -76,7 +77,7 @@ export default {
         return {
             botList: [
                 { id: 1, name: 'Bot 1', status: 'on', statusText: 'On the move', state: 'On the move', battery: 65, position: { x: 110, y: 50 }, color: 'bg-yellow-500' },
-                { id: 2, name: 'Bot 2', status: 'on', statusText: 'On the move', state: 'On the move', battery: 45, position: { x: 200, y: 200 }, color: 'bg-red-500' },
+                { id: 2, name: 'Bot 2', status: 'on', statusText: 'On the move', state: 'On the move', battery: 45, position: { x: 200, y: 200 }, color: 'bg-red-500' }
             ]
         }
     }
