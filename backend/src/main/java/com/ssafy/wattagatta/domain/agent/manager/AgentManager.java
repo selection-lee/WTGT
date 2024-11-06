@@ -6,11 +6,11 @@ import com.ssafy.wattagatta.domain.agent.model.Node;
 import com.ssafy.wattagatta.domain.product.dto.TargetLoc;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
-@Getter
 public class AgentManager {
 
     private final List<Agent> agents = new ArrayList<>();
