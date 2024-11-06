@@ -35,6 +35,9 @@ public class InvoiceEntity {
     @Column(name = "shipping_fee")
     private Integer shippingFee;
 
+    @Column(name = "invoice_number")
+    private String invoiceNumber;
+
     @Column(name = "tax")
     private Integer tax;
 
