@@ -3,11 +3,13 @@ package com.ssafy.wattagatta.global.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.wattagatta.domain.rccar.response.GridInfoResponse;
 import com.ssafy.wattagatta.domain.rccar.response.RcCarResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+@Slf4j
 @Component
 public class RcCarWebSocketHandler extends TextWebSocketHandler {
 
@@ -15,7 +17,7 @@ public class RcCarWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        System.out.println("WebSocket 연결됨: " + session.getId());
+        log.info("WebSocket 연결됨: {}", session.getId());
 
         RcCarResponse rcCar1 = new RcCarResponse(21.49, 3.77, 11.94);
         RcCarResponse rcCar2 = new RcCarResponse(2.0, 3.77, 3.0);
@@ -28,7 +30,7 @@ public class RcCarWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        System.out.println("수신된 메시지: " + message.getPayload());
+        log.info("수신된 메시지: {}", message.getPayload());
         RcCarResponse rcCar = new RcCarResponse(21.49, 3.77, 11.94);
         RcCarResponse rcCar2 = new RcCarResponse(2.0, 3.77, 3.0);
         GridInfoResponse coordinates = new GridInfoResponse(rcCar, rcCar2);
@@ -39,7 +41,7 @@ public class RcCarWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        System.err.println("WebSocket 오류: " + exception.getMessage());
+        log.error("WebSocket 오류: {}", exception.getMessage());
         session.close();
     }
 

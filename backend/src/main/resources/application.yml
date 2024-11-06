@@ -3,6 +3,11 @@ spring:
     import: optional:file:.env[.properties]
   application:
     name: wattagatta
+  rabbitmq:
+    port: 5672
+    username: guest
+    password: guest
+    host: localhost
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
