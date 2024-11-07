@@ -2,7 +2,7 @@ package com.ssafy.wattagatta.domain.order.controller;
 
 import static com.ssafy.wattagatta.global.utils.ApiUtils.success;
 
-import com.ssafy.wattagatta.domain.order.request.AddOrderRequest;
+import com.ssafy.wattagatta.domain.order.dto.request.AddOrderRequest;
 import com.ssafy.wattagatta.domain.order.service.OrderService;
 import com.ssafy.wattagatta.global.utils.ApiUtils.ApiResult;
 import lombok.RequiredArgsConstructor;

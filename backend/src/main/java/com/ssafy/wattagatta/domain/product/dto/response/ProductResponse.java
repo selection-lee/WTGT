@@ -1,4 +1,4 @@
-package com.ssafy.wattagatta.domain.product.response;
+package com.ssafy.wattagatta.domain.product.dto.response;
 
 import com.ssafy.wattagatta.domain.product.entity.ProductSize;
 import com.ssafy.wattagatta.domain.product.entity.ProductStatus;
