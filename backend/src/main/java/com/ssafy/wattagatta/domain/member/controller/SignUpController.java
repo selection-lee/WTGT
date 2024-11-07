@@ -1,6 +1,6 @@
 package com.ssafy.wattagatta.domain.member.controller;
 
-import com.ssafy.wattagatta.domain.auth.dto.SignUpDto;
+import com.ssafy.wattagatta.domain.member.dto.SignUpDto;
 import com.ssafy.wattagatta.domain.member.service.SignUpService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;

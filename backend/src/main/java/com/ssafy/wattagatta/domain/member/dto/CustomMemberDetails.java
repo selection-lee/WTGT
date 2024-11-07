@@ -1,4 +1,4 @@
-package com.ssafy.wattagatta.domain.auth.service;
+package com.ssafy.wattagatta.domain.member.dto;
 
 import com.ssafy.wattagatta.domain.member.entity.MemberEntity;
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 package com.ssafy.wattagatta.domain.auth.filter;
 
-import com.ssafy.wattagatta.domain.auth.service.CustomMemberDetails;
 import com.ssafy.wattagatta.domain.auth.util.JwtUtil;
+import com.ssafy.wattagatta.domain.member.dto.CustomMemberDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

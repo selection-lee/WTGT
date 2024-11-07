@@ -15,7 +15,7 @@ public enum ErrorCode {
     DUPLICATE_USERNAME(HttpStatus.BAD_REQUEST, 2001, "이미 존재하는 사용자명입니다."),
 
     // 로그인 실패
-    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, 2002, "아이디 또는 비밀번호가 올바르지 않습니다.");
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, 2002, "아이디 또는 비밀번호가 올바르지 않습니다."),
 
     // Product - 3000
     INVALID_REGION_CODE(HttpStatus.BAD_REQUEST, 3000, "유효하지 않은 지역 코드입니다."),

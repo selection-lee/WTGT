@@ -1,4 +1,4 @@
-package com.ssafy.wattagatta.domain.auth.dto;
+package com.ssafy.wattagatta.domain.member.dto;
 
 import lombok.Getter;
 import lombok.Setter;

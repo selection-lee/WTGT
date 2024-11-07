@@ -1,6 +1,6 @@
 package com.ssafy.wattagatta.domain.member.service;
 
-import com.ssafy.wattagatta.domain.auth.dto.SignUpDto;
+import com.ssafy.wattagatta.domain.member.dto.SignUpDto;
 import com.ssafy.wattagatta.domain.member.entity.MemberEntity;
 import com.ssafy.wattagatta.domain.member.entity.Role;
 import com.ssafy.wattagatta.domain.member.repository.MemberRepository;

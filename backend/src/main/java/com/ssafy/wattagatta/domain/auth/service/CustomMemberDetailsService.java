@@ -1,5 +1,6 @@
 package com.ssafy.wattagatta.domain.auth.service;
 
+import com.ssafy.wattagatta.domain.member.dto.CustomMemberDetails;
 import com.ssafy.wattagatta.domain.member.entity.MemberEntity;
 import com.ssafy.wattagatta.domain.member.repository.MemberRepository;
 import com.ssafy.wattagatta.global.exception.CustomException;
