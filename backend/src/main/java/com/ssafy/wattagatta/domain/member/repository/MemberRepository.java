@@ -5,5 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MemberRepository extends JpaRepository<MemberEntity, Integer> {
     // 사용자명 중복 체크
-    boolean existsByUsername(String username);
+    Boolean existsByUsername(String username);
+
+    // username 받아서 db테이블에서 회원을 조회
+    MemberEntity findByUsername(String username);
 }
