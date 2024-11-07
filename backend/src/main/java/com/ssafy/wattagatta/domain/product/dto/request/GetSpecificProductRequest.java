@@ -1,4 +1,4 @@
-package com.ssafy.wattagatta.domain.product.request;
+package com.ssafy.wattagatta.domain.product.dto.request;
 
 import java.time.LocalDate;
 
