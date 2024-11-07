@@ -1,5 +1,6 @@
 package com.ssafy.wattagatta.domain.agent.model;
 
+import com.ssafy.wattagatta.domain.product.dto.TargetLoc;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -32,5 +33,11 @@ public class Agent {
 
     public boolean isAvailable() {
         return this.status == AgentStatus.IDLE;
+    }
+
+    public void assignTask(TargetLoc targetLoc, int currentGlobalTime) {
+        this.goalNode = new Node(targetLoc.x(), targetLoc.y(), Direction.NORTH);
+        this.status = AgentStatus.MOVING_TO_TARGET;
+        this.startTime = currentGlobalTime;
     }
 }
