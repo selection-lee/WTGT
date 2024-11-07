@@ -8,8 +8,8 @@
 
       <!-- 실시간 입고 상품 테이블 -->
       <section class="mb-8">
-        <div class="bg-gray-950 p-8 rounded-lg">
-          <h3 class="text-xl font-semibold mb-4">실시간 입고 상품</h3>
+        <div class="bg-gray-950 p-5 rounded-lg">
+          <h3 class="text-xl font-semibold text-gray-300 mb-4">실시간 입고 상품</h3>
           <table class="w-full bg-gray-700 rounded-lg text-center">
             <thead>
               <tr class="bg-gray-800">
@@ -49,65 +49,65 @@
       </section>
 
       <!-- 입고 단계별 건수 -->
-      <section class="bg-gray-950 p-8 rounded-lg">
-        <h3 class="text-xl font-semibold mb-4">입고 단계별 건수</h3>
+      <section class="bg-gray-950 p-5 rounded-lg">
+        <h3 class="text-xl font-semibold text-gray-300 mb-4">입고 단계별 건수</h3>
 
-        <!-- 테이블 형식으로 수정 및 진행 퍼센트 아이콘 추가 -->
-        <table class="w-full bg-gray-700 rounded-lg text-center">
+        <!-- 테이블, 진행 퍼센트 아이콘 -->
+        <table class="w-full bg-gray-700 rounded-lg text-center table-fixed">
           <thead>
             <tr class="bg-gray-800">
-              <th class="py-2 text-gray-400">대기 중</th>
-              <th class="py-2 text-gray-400">이동 중</th>
-              <th class="py-2 text-gray-400">적재 완료</th>
-              <th class="py-2 text-gray-400">인식 실패 / 미등록</th>
+              <th class="py-2 w-1/4">대기 중</th>
+              <th class="py-2 w-1/4">이동 중</th>
+              <th class="py-2 w-1/4">적재 완료</th>
+              <th class="py-2 w-1/4">인식 실패 / 미등록</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td class="py-2 text-xl font-bold">
                 {{ counts.pending }}
-                <!-- 진행 퍼센트 아이콘 -->
-                <div class="relative w-full bg-gray-600 rounded h-2 mt-2">
-                  <div
-                    class="absolute left-0 top-0 h-2 bg-yellow-500 rounded"
-                    :style="{ width: pendingPercent + '%' }"
-                  ></div>
-                </div>
-                <p class="text-sm text-gray-400 mt-1">{{ pendingPercent }}%</p>
+                <p class="text-sm text-yellow-500 mt-1">{{ pendingPercent }}%</p>
               </td>
-              <td class="py-4 text-xl font-bold">
+              <td class="py-2 text-xl font-bold">
                 {{ counts.inTransit }}
-                <div class="relative w-full bg-gray-600 rounded h-2 mt-2">
-                  <div
-                    class="absolute left-0 top-0 h-2 bg-blue-500 rounded"
-                    :style="{ width: inTransitPercent + '%' }"
-                  ></div>
-                </div>
-                <p class="text-sm text-gray-400 mt-1">
+                <p class="text-sm text-blue-500 mt-1">
                   {{ inTransitPercent }}%
                 </p>
               </td>
-              <td class="py-4 text-xl font-bold">
+              <td class="py-2 text-xl font-bold">
                 {{ counts.completed }}
-                <div class="relative w-full bg-gray-600 rounded h-2 mt-2">
-                  <div
-                    class="absolute left-0 top-0 h-2 bg-green-500 rounded"
-                    :style="{ width: completedPercent + '%' }"
-                  ></div>
-                </div>
-                <p class="text-sm text-gray-400 mt-1">
+                <p class="text-sm text-green-500 mt-1">
                   {{ completedPercent }}%
                 </p>
               </td>
-              <td class="py-4 text-xl font-bold">
+              <td class="py-2 text-xl font-bold">
                 {{ counts.failed }}
-                <div class="relative w-full bg-gray-600 rounded h-2 mt-2">
+                <p class="text-sm text-red-500 mt-1">{{ failedPercent }}%</p>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="4" class="py-2">
+                <!-- 통합 진행 퍼센트 아이콘 -->
+                <div class="relative w-full bg-gray-600 rounded h-4 mt-2 flex">
+                  <!-- 각각의 비율을 너비로 적용한 진행 바 -->
                   <div
-                    class="absolute left-0 top-0 h-2 bg-red-500 rounded"
+                    class="h-4 bg-yellow-500"
+                    :style="{ width: pendingPercent + '%' }"
+                  >
+                </div>
+                  <div
+                    class="h-4 bg-blue-500"
+                    :style="{ width: inTransitPercent + '%' }"
+                  ></div>
+                  <div
+                    class="h-4 bg-green-500"
+                    :style="{ width: completedPercent + '%' }"
+                  ></div>
+                  <div
+                    class="h-4 bg-red-500"
                     :style="{ width: failedPercent + '%' }"
                   ></div>
                 </div>
-                <p class="text-sm text-gray-400 mt-1">{{ failedPercent }}%</p>
               </td>
             </tr>
           </tbody>
