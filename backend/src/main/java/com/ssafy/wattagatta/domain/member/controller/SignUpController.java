@@ -16,7 +16,7 @@ public class SignUpController {
         this.signUpService = signUpService;
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/api/signup")
     public String signUpProcess(SignUpDto signUpDto) {
         System.out.println(signUpDto.getUsername());
         signUpService.signUpProcess(signUpDto);

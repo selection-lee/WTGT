@@ -54,7 +54,7 @@ public class SecurityConfig {
 
         LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil);
 
-        loginFilter.setFilterProcessesUrl("/login");
+        loginFilter.setFilterProcessesUrl("/api/login");
 
         return http
                 .cors(corsConfigurer -> corsConfigurer.configurationSource(apiConfigurationSource()))
