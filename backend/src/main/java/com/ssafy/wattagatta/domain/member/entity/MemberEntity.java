@@ -17,9 +17,11 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "member")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberEntity extends BaseEntity {
@@ -45,4 +47,10 @@ public class MemberEntity extends BaseEntity {
     @OneToMany(mappedBy = "memberEntity", fetch = FetchType.LAZY)
     private List<OrderEntity> orders = new ArrayList<>();
 
+    public MemberEntity(String username, String nickname, String password, Role role) {
+        this.username = username;
+        this.nickname = nickname;
+        this.password = password;
+        this.role = role;
+    }
 }
