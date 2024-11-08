@@ -24,10 +24,20 @@ public class JwtUtil {
                 .get("username", String.class);
     }
 
+    public String getNickname(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
+                .get("nickname", String.class);
+    }
+
     public String getRole(String token) {
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
                 .get("role", String.class);
+    }
+
+    public String getCreatedAt(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload()
+                .get("createdAt", String.class);
     }
 
     public Boolean isExpired(String token) {
@@ -36,11 +46,13 @@ public class JwtUtil {
                 .before(new Date());
     }
 
-    public String createJwt(String username, String role, Long expiredMs) {
+    public String createJwt(String username, String nickname, String role, String createdAt, Long expiredMs) {
 
         return Jwts.builder()
                 .claim("username", username)
+                .claim("nickname", nickname)
                 .claim("role", role)
+                .claim("createdAt", createdAt)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)
