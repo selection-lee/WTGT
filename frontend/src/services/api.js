@@ -33,7 +33,17 @@ export const authApi = {
   
   // 회원가입
   signup: async (userData) => {
-    const response = await api.post('/api/signup', userData)
+    const formData = new URLSearchParams()
+
+    formData.append('username', userData.username)
+    formData.append('password', userData.password)
+    formData.append('nickname', userData.nickname)
+    
+    const response = await api.post('/signup', formData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
     return response.data
   }
 }

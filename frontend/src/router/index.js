@@ -6,6 +6,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout.vue'
 import DashboardView from '@/views/Dashboard/DashboardView.vue'
 import RCcarView from '@/views/RC_car/RCcarView.vue' // RC 카 페이지 컴포넌트
 import LoginView from '@/views/Auth/LoginView.vue'
+import SignUpView from '@/views/Auth/SignUpView.vue'
 import OrderView from '@/views/Order/OrderView.vue' 
 import UserView from '@/views/User/UserView.vue' 
 import MonitoringView from '@/views/Monitoring/MonitoringView.vue' 
@@ -65,6 +66,14 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginView,
+    meta: {
+      requiresAuth: false
+    }
+  },
+  {
+    path: '/signup',
+    name: 'signup',
+    component: SignUpView,
     meta: {
       requiresAuth: false
     }
