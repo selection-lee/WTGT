@@ -1,5 +1,8 @@
 package com.ssafy.wattagatta.domain.agent.manager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.wattagatta.domain.agent.dto.response.AgentDataResponse;
+import com.ssafy.wattagatta.domain.agent.dto.response.AgentPositionResponse;
 import com.ssafy.wattagatta.domain.agent.model.Agent;
 import com.ssafy.wattagatta.domain.agent.model.AgentStatus;
 import com.ssafy.wattagatta.domain.agent.model.Constraint;
@@ -15,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -25,21 +29,33 @@ public class AgentManager {
     private final PathStore pathStore;
     private final GlobalClock globalClock;
     private final PathCalcService pathCalcService;
+    private final ObjectMapper objectMapper;
+    private final WebSocketSessionManager webSocketSessionManager;
 
     private Agent agent1 = new Agent();
     private Agent agent2 = new Agent();
 
-    private final int TASK_DURATION_TIME = 5;
+    @Value("${agent.task.duration.time}")
+    private int TASK_DURATION_TIME;
 
-    public AgentManager(PathCalcService pathCalcService, GlobalClock globalClock) {
+    @Value("${agent.move.duration.time}")
+    private int MOVE_DURATION_TIME;
+
+    @Value("${websocket.unity.path}")
+    private String path;
+
+    public AgentManager(PathCalcService pathCalcService, GlobalClock globalClock,
+                        WebSocketSessionManager webSocketSessionManager) {
         this.globalClock = globalClock;
         this.pathCalcService = pathCalcService;
         this.agents = new ArrayList<>();
         this.pathStore = new PathStore();
+        objectMapper = new ObjectMapper();
         agent1.ready("agent1", new Node(1, 0, Direction.EAST));
         agent2.ready("agent2", new Node(0, 1, Direction.EAST));
         agents.add(agent1);
         agents.add(agent2);
+        this.webSocketSessionManager = webSocketSessionManager;
     }
 
     public void assignTaskToAgent(Agent agent, TargetLoc targetLoc) {
@@ -62,6 +78,20 @@ public class AgentManager {
 
         pathStore.reserveTaskLocation(agent.getId(), currentGlobalTime + newPath.size(),
                 newPath.get(newPath.size() - 1), TASK_DURATION_TIME);
+
+        agent.moveAlongPath(
+                // agent 이동
+                nextNode -> {
+                    int angle = calculateAngle(agent.getCurrentNode(), nextNode);
+                    boolean arrived = agent.getCurrentPath().isEmpty();
+                    sendAgentLocationUpdate(agent, nextNode, angle, arrived);
+                },
+                // agent 작업 수행
+                () -> agent.performTask(TASK_DURATION_TIME)
+
+        );
+
+        // 수행 후 복귀
     }
 
     public synchronized Agent findAvailableAgent() {
@@ -81,6 +111,47 @@ public class AgentManager {
 
     public synchronized void notifyAgentAvailable() {
         notifyAll();
+    }
+
+    private void sendAgentLocationUpdate(Agent agent, Node nextNode, int angle, boolean arrived) {
+        try {
+            AgentPositionResponse rcCarPosition = new AgentPositionResponse(
+                    nextNode.getX(),
+                    -2,
+                    nextNode.getY()
+            );
+            AgentDataResponse response = new AgentDataResponse(
+                    Integer.parseInt(agent.getId().replace("agent", "")),
+                    rcCarPosition,
+                    angle,
+                    arrived
+            );
+
+            String jsonMessage = objectMapper.writeValueAsString(response);
+            log.info("Unity 전송 데이터 : {}", jsonMessage);
+            if (!webSocketSessionManager.sendMessageToPath(path, jsonMessage)) {
+                log.error("메시지 전송 실패");
+            }
+        } catch (Exception e) {
+            log.error("에이전트 위치 전송 실패", e);
+        }
+    }
+
+    private int calculateAngle(Node currentNode, Node nextNode) {
+        if (currentNode.getDirection() == nextNode.getDirection()) {
+            return 1; // 직진
+        } else if (isRightTurn(currentNode.getDirection(), nextNode.getDirection())) {
+            return 2; // 우회전
+        } else {
+            return 0; // 좌회전
+        }
+    }
+
+    private boolean isRightTurn(Direction current, Direction next) {
+        return (current == Direction.NORTH && next == Direction.EAST)
+                || (current == Direction.EAST && next == Direction.SOUTH)
+                || (current == Direction.SOUTH && next == Direction.WEST)
+                || (current == Direction.WEST && next == Direction.NORTH);
     }
 
 }
