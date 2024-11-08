@@ -28,6 +28,9 @@ spring:
         format_sql: true
     show-sql: true
 
+  jwt:
+    secret: ${JWT_SECRET_KEY}
+
 agent:
   task:
     duration:
@@ -39,3 +42,5 @@ agent:
 websocket:
   unity:
     path: /ws/rccar
+
+      
