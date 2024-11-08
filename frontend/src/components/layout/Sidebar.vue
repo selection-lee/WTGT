@@ -10,7 +10,7 @@
 
     <!-- User Profile -->
     <a href="#" class="hover:bg-white/10 transition duration-150 ease-linear rounded-lg group w-full py-3 px-2">
-      <UserAvatar :image="user.image" :name="user.name" :description="user.company" />
+      <UserAvatar :image="'/user-profile.jpg'" :name="authStore.user?.nickname || 'User'" :description="authStore.user?.role || 'ADMIN'" />
     </a>
 
     <hr class="my-2 border-slate-700" />
@@ -55,12 +55,6 @@ const handleLogout = () => {
   authStore.logout()
   router.push('/login')
 }
-
-const user = ref({
-  image: "/user-profile.jpg",
-  name: "관리자_김포키",
-  company: "Administrator",
-});
 
 const menuItems = ref([
   {

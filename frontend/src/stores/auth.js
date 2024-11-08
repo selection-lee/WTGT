@@ -9,6 +9,27 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('token'))
   const isAuthenticated = ref(!!token.value)
 
+  // JWT 토큰에서 사용자 정보 파싱
+  const parseUserFromToken = (token) => {
+    try {
+      const decoded = jwtDecode(token)
+      return {
+        username: decoded.username,
+        nickname: decoded.nickname,
+        role: decoded.role,
+        createdAt: decoded.createdAt
+      }
+    } catch (error) {
+      console.error('Failed to decode token:', error)
+      return null
+    }
+  }
+
+  // 초기화: 토큰이 있다면 사용자 정보 파싱
+  if (token.value) {
+    user.value = parseUserFromToken(token.value)
+  }
+
   // 로그인
   const login = async (credentials) => {
     try {
@@ -22,10 +43,16 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.setItem('token', newToken)
         isAuthenticated.value = true
 
-        // 사용자 정보 저장
-        user.value = {
-          username: credentials.username
-        }
+        // JWT에서 사용자 정보 파싱
+        user.value = parseUserFromToken(newToken)
+
+        // // 사용자 정보 저장
+        // user.value = {
+        //   username: credentials.username,
+        //   nickname: response.data.nickname,
+        //   role: response.data.role,
+        //   createdAt: response.data.createdAt
+        // }
 
         return true
       }
