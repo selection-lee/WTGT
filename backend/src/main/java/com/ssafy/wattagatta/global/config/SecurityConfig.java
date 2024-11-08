@@ -3,6 +3,7 @@ package com.ssafy.wattagatta.global.config;
 import com.ssafy.wattagatta.domain.auth.filter.LoginFilter;
 import com.ssafy.wattagatta.domain.auth.util.JwtUtil;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,8 +24,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  *
  * @author 김훈민
  */
-//@RequiredArgsConstructor
 @Configuration
+@RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {
 
@@ -36,13 +37,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     // JwtUtil 주입
     private final JwtUtil jwtUtil;
-
-    // 필요한가?
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtil jwtUtil) {
-
-        this.authenticationConfiguration = authenticationConfiguration;
-        this.jwtUtil = jwtUtil;
-    }
+    
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
