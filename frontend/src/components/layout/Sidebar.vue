@@ -9,8 +9,10 @@
     <p class="text-slate-400 text-sm mb-2">Hello,</p>
 
     <!-- User Profile -->
-    <a href="#" class="hover:bg-white/10 transition duration-150 ease-linear rounded-lg group w-full py-3 px-2">
-      <UserAvatar :image="'/user-profile.jpg'" :name="authStore.user?.nickname || 'User'" :description="authStore.user?.role || 'ADMIN'" />
+    <a href="/user" class="hover:bg-white/10 transition-all block duration-150 ease-linear rounded-lg group w-full">
+      <div class="py-3 px-2">
+        <UserAvatar :image="'/user-profile.jpg'" :name="authStore.user?.nickname || 'User'" :description="authStore.user?.role || 'ADMIN'" />
+      </div>
     </a>
 
     <hr class="my-2 border-slate-700" />
@@ -85,7 +87,7 @@ const menuItems = ref([
   {
     name: "User",
     icon: "UserIcon",
-    path: "/users",
+    path: "/user",
   },
 ]);
 </script>
