@@ -3,7 +3,7 @@
   <!-- 메인 컨테이너: flex 클래스를 통해 요소들을 수평 배치 -->
   <div class="flex">
     <div class="flex-1 p-5 text-white">
-      <!-- USer 제목 -->
+      <!-- User 제목 -->
       <h2 class="text-xl font-bold mb-4">User</h2>
 
       <!-- 전체 폼을 감싸는 컨테이너 -->

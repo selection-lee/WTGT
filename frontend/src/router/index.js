@@ -44,8 +44,8 @@ const routes = [
         component: IncomeSection
       },
       {
-        path: 'users',
-        name: 'users',
+        path: 'user',
+        name: 'user',
         component: UserView
       },
     //   {
