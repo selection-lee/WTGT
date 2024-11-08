@@ -63,22 +63,14 @@ public class AgentManager {
         agent.assignTask(targetLoc, currentGlobalTime);
 
         Map<String, Map<Integer, Node>> allAgentPositions = pathStore.getAllPositions();
-        List<Constraint> pathConstraints = pathStore.getConstraintsForAgent(agent.getId());
-
-        List<Node> newPath = pathCalcService.calcPath(agent, pathConstraints);
-        if (newPath == null) {
-            agent.setStatus(AgentStatus.IDLE);
-            throw new CustomException(ErrorCode.CANNOT_FIND_NEW_PATH);
-        }
-
-        agent.setCurrentPath(new ArrayList<>(newPath));
+        List<Node> newPath = calcAgentPath(agent);
         log.info("에이전트 {}의 경로: {}", agent.getId(), newPath);
 
         pathStore.savePath(agent.getId(), currentGlobalTime, newPath);
-
         pathStore.reserveTaskLocation(agent.getId(), currentGlobalTime + newPath.size(),
                 newPath.get(newPath.size() - 1), TASK_DURATION_TIME);
 
+        int finalCurrentGlobalTime = currentGlobalTime + newPath.size() + TASK_DURATION_TIME;
         agent.moveAlongPath(
                 // agent 이동
                 nextNode -> {
@@ -87,11 +79,46 @@ public class AgentManager {
                     sendAgentLocationUpdate(agent, nextNode, angle, arrived);
                 },
                 // agent 작업 수행
-                () -> agent.performTask(TASK_DURATION_TIME)
-
+                () -> {
+                    agent.performTask(TASK_DURATION_TIME);
+                    agent.assignReturnHomeTask(finalCurrentGlobalTime);
+                    List<Node> homePath = calcAgentPath(agent);
+                    pathStore.savePath(agent.getId(), globalClock.getGlobalTime(), homePath);
+                    pathStore.reserveTaskLocation(agent.getId(), currentGlobalTime + homePath.size(),
+                            homePath.get(homePath.size() - 1), TASK_DURATION_TIME);
+                },
+                // agent 복귀 준비
+                () -> {
+                    log.info("에이전트 {}의 복귀 경로: {}", agent.getId(), agent1.getCurrentPath());
+                    agent.setCurrentNode(agent.getGoalNode());
+                    agent.setGoalNode(agent.getHomeNode());
+                    agent.setStatus(AgentStatus.RETURNING_HOME);
+                },
+                nextNode -> {
+                    int angle = calculateAngle(agent.getCurrentNode(), nextNode);
+                    boolean arrived = agent.getCurrentPath().isEmpty();
+                    sendAgentLocationUpdate(agent, nextNode, angle, arrived);
+                },
+                // 복귀 완료
+                () -> {
+                    if (agent.getStatus() == AgentStatus.RETURNING_HOME) {
+                        agent.setStatus(AgentStatus.IDLE);
+                        pathStore.removePath(agent.getId());
+                        notifyAgentAvailable();
+                    }
+                }
         );
+    }
 
-        // 수행 후 복귀
+    private List<Node> calcAgentPath(Agent agent) {
+        List<Constraint> homePathConstraints = pathStore.getConstraintsForAgent(agent.getId());
+        List<Node> homePath = pathCalcService.calcPath(agent, homePathConstraints);
+        if (homePath == null) {
+            agent.setStatus(AgentStatus.IDLE);
+            throw new CustomException(ErrorCode.CANNOT_FIND_NEW_PATH);
+        }
+        agent.setCurrentPath(new ArrayList<>(homePath));
+        return homePath;
     }
 
     public synchronized Agent findAvailableAgent() {

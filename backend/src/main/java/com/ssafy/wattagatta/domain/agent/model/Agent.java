@@ -46,7 +46,14 @@ public class Agent {
         this.startTime = currentGlobalTime;
     }
 
-    public void moveAlongPath(Consumer<Node> positionUpdateCallback, Runnable onPathComplete) {
+    public void assignReturnHomeTask(int currentGlobalTime) {
+        this.goalNode = this.homeNode;
+        this.status = AgentStatus.RETURNING_HOME;
+        this.startTime = currentGlobalTime;
+    }
+
+    public void moveAlongPath(Consumer<Node> positionUpdateCallback, Runnable onPathComplete, Runnable onTaskComplete,
+                              Consumer<Node> returnPositionUpdateCallback, Runnable onReturnComplete) {
         if (isMoving || currentPath == null || currentPath.isEmpty()) {
             return;
         }
@@ -57,14 +64,21 @@ public class Agent {
                 while (!currentPath.isEmpty()) {
                     Node nextNode = currentPath.remove(0);
                     setCurrentNode(nextNode);
-
                     positionUpdateCallback.accept(nextNode);
-
                     Thread.sleep(1000);
                 }
                 onPathComplete.run();
+                onTaskComplete.run();
+                while (!currentPath.isEmpty()) {
+                    Node nextNode = currentPath.remove(0);
+                    setCurrentNode(nextNode);
+                    returnPositionUpdateCallback.accept(nextNode);
+                    Thread.sleep(1000);
+                }
+                onReturnComplete.run();
             } catch (InterruptedException e) {
                 log.error("이동 중 예외 발생", e);
+                Thread.currentThread().interrupt();
             } finally {
                 isMoving = false;
             }

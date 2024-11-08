@@ -29,7 +29,6 @@ public class AStar {
         PriorityQueue<State> openList = new PriorityQueue<>();
         Map<StateKey, State> closedList = new HashMap<>();
         Node goalNode = agent.getGoalNode();
-        Node homeNode = agent.getHomeNode();
 
         State startState = State.createStartState(agent, heuristic(agent.getCurrentNode(), goalNode));
 
