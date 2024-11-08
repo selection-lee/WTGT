@@ -68,7 +68,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useAuthStore } from '@/stores/auth' // 추가 예정
+import { useAuthStore } from '@/stores/auth' 
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -87,7 +87,6 @@ const handleLogin = async () => {
     router.push('/') // 로그인 성공 시 대시보드로 이동
   } catch (error) {
     console.error('Login failed:', error)
-    // TODO: 에러 처리 (토스트 메시지 등)
   }
 }
 </script>
