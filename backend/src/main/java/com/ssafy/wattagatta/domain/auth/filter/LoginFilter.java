@@ -2,6 +2,7 @@ package com.ssafy.wattagatta.domain.auth.filter;
 
 import com.ssafy.wattagatta.domain.auth.util.JwtUtil;
 import com.ssafy.wattagatta.domain.member.dto.CustomMemberDetails;
+import com.ssafy.wattagatta.domain.member.entity.MemberEntity;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,6 +47,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // UserDetails
         CustomMemberDetails customMemberDetails = (CustomMemberDetails) authentication.getPrincipal();
+        MemberEntity member = customMemberDetails.getMemberEntity(); // 멤버 엔티티 가져오기
 
         String username = customMemberDetails.getUsername();
 
@@ -55,7 +57,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt(username, role, 60 * 60 * 24L);
+        String token = jwtUtil.createJwt(username, member.getNickname(), role, member.getCreatedAt().toString(), 60 * 60 * 24L);
 
         response.addHeader("Authorization", "Bearer " + token);
     }
