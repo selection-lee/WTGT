@@ -1,6 +1,6 @@
 package com.ssafy.wattagatta.global.config;
 
-import com.ssafy.wattagatta.global.handler.AgentWebSocketHandler;
+import com.ssafy.wattagatta.domain.agent.handler.AgentWebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
