@@ -27,3 +27,15 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
     show-sql: true
+
+agent:
+  task:
+    duration:
+      time: 5000
+  move:
+    duration:
+      time: 1000
+
+websocket:
+  unity:
+    path: /ws/rccar
