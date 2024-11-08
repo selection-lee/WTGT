@@ -5,7 +5,7 @@ import com.ssafy.wattagatta.domain.agent.model.AgentStatus;
 import com.ssafy.wattagatta.domain.agent.model.Constraint;
 import com.ssafy.wattagatta.domain.agent.model.Direction;
 import com.ssafy.wattagatta.domain.agent.model.Node;
-import com.ssafy.wattagatta.domain.agent.service.AgentService;
+import com.ssafy.wattagatta.domain.agent.service.PathCalcService;
 import com.ssafy.wattagatta.domain.agent.utils.PathStore;
 import com.ssafy.wattagatta.domain.product.dto.TargetLoc;
 import com.ssafy.wattagatta.global.exception.CustomException;
@@ -24,16 +24,16 @@ public class AgentManager {
     private final List<Agent> agents;
     private final PathStore pathStore;
     private final GlobalClock globalClock;
-    private final AgentService agentService;
+    private final PathCalcService pathCalcService;
 
     private Agent agent1 = new Agent();
     private Agent agent2 = new Agent();
 
     private final int TASK_DURATION_TIME = 5;
 
-    public AgentManager(AgentService agentService, GlobalClock globalClock) {
+    public AgentManager(PathCalcService pathCalcService, GlobalClock globalClock) {
         this.globalClock = globalClock;
-        this.agentService = agentService;
+        this.pathCalcService = pathCalcService;
         this.agents = new ArrayList<>();
         this.pathStore = new PathStore();
         agent1.ready("agent1", new Node(1, 0, Direction.EAST));
@@ -49,7 +49,7 @@ public class AgentManager {
         Map<String, Map<Integer, Node>> allAgentPositions = pathStore.getAllPositions();
         List<Constraint> pathConstraints = pathStore.getConstraintsForAgent(agent.getId());
 
-        List<Node> newPath = agentService.calcPath(agent, pathConstraints);
+        List<Node> newPath = pathCalcService.calcPath(agent, pathConstraints);
         if (newPath == null) {
             agent.setStatus(AgentStatus.IDLE);
             throw new CustomException(ErrorCode.CANNOT_FIND_NEW_PATH);
