@@ -3,6 +3,7 @@ package com.ssafy.wattagatta.domain.agent.service;
 import com.ssafy.wattagatta.domain.agent.manager.AgentManager;
 import com.ssafy.wattagatta.domain.agent.model.Agent;
 import com.ssafy.wattagatta.domain.product.listener.ProductInfoListener;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,11 @@ public class AgentService {
 
     private final AgentManager agentManager;
     private final ProductInfoListener productInfoListener;
+
+    @PostConstruct
+    private void startFindIdleAgent() {
+        findIdleAgent();
+    }
 
     private void findIdleAgent() {
         new Thread(() -> {
