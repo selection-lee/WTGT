@@ -14,6 +14,7 @@ public class State implements Comparable<State> {
     public double h;
     public double f;
     public Node node;
+    
 
     public static State createStartState(Agent agent, double heuristic) {
         double g = 0;

@@ -168,11 +168,12 @@ public class AStar {
             }
 
             if (constraint.getType() == ConstraintType.VERTEX) {
-                if (constraint.getNode().equals(toNode)) {
+                if (constraint.getNode().equalsPosition(toNode)) {
                     return true;
                 }
             } else if (constraint.getType() == ConstraintType.EDGE) {
-                if (constraint.getFromNode().equals(fromNode) && constraint.getToNode().equals(toNode)) {
+                if (constraint.getFromNode().equalsPosition(fromNode) && constraint.getToNode()
+                        .equalsPosition(toNode)) {
                     return true;
                 }
             }
