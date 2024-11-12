@@ -16,6 +16,7 @@ import com.ssafy.wattagatta.global.exception.ErrorCode;
 import com.ssafy.wattagatta.global.utils.GlobalClock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -57,29 +58,33 @@ public class AgentManager {
         this.webSocketSessionManager = webSocketSessionManager;
     }
 
-    public synchronized void assignTaskToAgent(Agent agent, TargetLoc targetLoc) {
-        int currentGlobalTime = globalClock.getGlobalTime();
-        agent.assignTask(targetLoc, currentGlobalTime);
+    public synchronized void assignTaskToAgent(Agent agent, TargetLoc targetLoc, Consumer<TargetLoc> failureCallback) {
+        try {
+            int currentGlobalTime = globalClock.getGlobalTime();
+            agent.assignTask(targetLoc, currentGlobalTime);
 
-        // 작업 경로 계산
-        List<Constraint> constraints = pathStore.getConstraintsForAgent(agent.getId());
-        List<Node> pathToTarget = calcAgentPathToTarget(agent, currentGlobalTime, constraints);
+            // 작업 경로 계산
+            List<Constraint> constraints = pathStore.getConstraintsForAgent(agent.getId());
+            List<Node> pathToTarget = calcAgentPathToTarget(agent, constraints);
 
-        // 작업 수행 시간 계산
-        int arrivalTimeAtTarget = currentGlobalTime + pathToTarget.size();
-        reserveTaskLocationAndUpdateConstraints(agent, arrivalTimeAtTarget, constraints);
+            // 복귀 경로 계산
+            List<Node> returnPath = calcAgentReturnPath(agent, constraints);
 
-        // 복귀 경로 계산
-        int startTimeForReturn = arrivalTimeAtTarget + TASK_DURATION_TIME;
-        List<Node> returnPath = calcAgentReturnPath(agent, startTimeForReturn, constraints);
+            log.info("에이전트 {}의 경로: {}", agent.getId(), pathToTarget);
+            log.info("에이전트 {}의 복귀 경로 : {}", agent.getId(), returnPath);
 
-        log.info("에이전트 {}의 경로: {}", agent.getId(), pathToTarget);
-        log.info("에이전트 {}의 복귀 경로 : {}", agent.getId(), returnPath);
+            List<Node> fullPath = assignFullPathToAgent(agent, pathToTarget, returnPath);
+            pathStore.savePath(agent.getId(), currentGlobalTime, fullPath);
+            List<Constraint> constraints1 = pathStore.getConstraintsForAgent("1");
+            log.info("에이전트 전체 설정 경로 : {}", agent.getCurrentPath());
+            log.info("등록된 constraint : {}", constraints1);
 
-        List<Node> fullPath = assignFullPathToAgent(agent, pathToTarget, returnPath);
-        pathStore.savePath(agent.getId(), currentGlobalTime, fullPath);
-
-        simulateAgentMovement(agent, fullPath, pathToTarget.size());
+            simulateAgentMovement(agent, fullPath, pathToTarget.size());
+        } catch (CustomException e) {
+            log.error("에이전트 {}가 경로를 찾지 못했습니다: {}", agent.getId(), e.getMessage());
+            agent.setStatus(AgentStatus.IDLE);
+            failureCallback.accept(targetLoc);
+        }
     }
 
     private void simulateAgentMovement(Agent agent, List<Node> fullPath, int pathToTargetSize) {
@@ -87,6 +92,7 @@ public class AgentManager {
             try {
                 Node previousNode = null;
                 for (int i = 0; i < fullPath.size(); i++) {
+                    log.info("simulate i : {}, fullPath.size : {}", i, fullPath.size());
                     Node currentNode = fullPath.get(i);
 
                     Thread.sleep(1000);
@@ -106,40 +112,30 @@ public class AgentManager {
                     agent.setCurrentNode(currentNode);
                     previousNode = currentNode;
                 }
-
+            } catch (InterruptedException e) {
+                log.error("에이전트 이동 시뮬레이션 중 예외 발생", e);
+                Thread.currentThread().interrupt();
+            } finally {
                 agent.setStatus(AgentStatus.IDLE);
                 pathStore.removePath(agent.getId());
                 notifyAgentAvailable();
                 log.info("에이전트 {}가 작업 및 복귀를 완료했습니다.", agent.getId());
-            } catch (InterruptedException e) {
-                log.error("에이전트 이동 시뮬레이션 중 예외 발생", e);
-                Thread.currentThread().interrupt();
             }
         }).start();
     }
 
 
-    private List<Node> calcAgentPathToTarget(Agent agent, int startTime, List<Constraint> constraints) {
+    private List<Node> calcAgentPathToTarget(Agent agent, List<Constraint> constraints) {
         List<Node> pathToTarget = pathCalcService.calcPath(agent, constraints);
         if (pathToTarget == null) {
             agent.setStatus(AgentStatus.IDLE);
             throw new CustomException(ErrorCode.CANNOT_FIND_NEW_PATH);
         }
-        pathStore.savePath(agent.getId(), startTime, pathToTarget);
         return pathToTarget;
     }
 
-    private void reserveTaskLocationAndUpdateConstraints(Agent agent, int arrivalTime, List<Constraint> constraints) {
-        Node taskNode = agent.getGoalNode();
 
-        pathStore.reserveTaskLocation(agent.getId(), arrivalTime, taskNode, TASK_DURATION_TIME);
-
-        for (int t = arrivalTime; t < arrivalTime + TASK_DURATION_TIME; t++) {
-            constraints.add(Constraint.createVertexConstraint(agent.getId(), taskNode, t));
-        }
-    }
-
-    private List<Node> calcAgentReturnPath(Agent agent, int startTime, List<Constraint> constraints) {
+    private List<Node> calcAgentReturnPath(Agent agent, List<Constraint> constraints) {
         agent.setCurrentNode(agent.getGoalNode());
         agent.setGoalNode(agent.getHomeNode());
 
@@ -148,17 +144,12 @@ public class AgentManager {
             agent.setStatus(AgentStatus.IDLE);
             throw new CustomException(ErrorCode.CANNOT_FIND_NEW_PATH);
         }
-        pathStore.savePath(agent.getId(), startTime, returnPath);
+
         return returnPath;
     }
 
     private List<Node> assignFullPathToAgent(Agent agent, List<Node> pathToTarget, List<Node> returnPath) {
         List<Node> fullPath = new ArrayList<>(pathToTarget);
-
-        for (int i = 0; i < TASK_DURATION_TIME; i++) {
-            fullPath.add(agent.getGoalNode());
-        }
-
         fullPath.addAll(returnPath);
         agent.setCurrentPath(fullPath);
         return fullPath;
@@ -193,6 +184,7 @@ public class AgentManager {
 
     public synchronized void notifyAgentAvailable() {
         notifyAll();
+        log.info("agent 작업 완료 notify All");
     }
 
     private void sendAgentLocationUpdate(Agent agent, Node nextNode, int angle, boolean arrived) {
@@ -210,7 +202,7 @@ public class AgentManager {
             );
 
             String jsonMessage = objectMapper.writeValueAsString(response);
-            log.info("Unity 전송 데이터 : {}", jsonMessage);
+//            log.info("Unity 전송 데이터 : {}", jsonMessage);
             if (!webSocketSessionManager.sendMessageToPath(path, jsonMessage)) {
                 log.error("메시지 전송 실패");
             }
