@@ -34,10 +34,10 @@ spring:
 agent:
   task:
     duration:
-      time: 5000
+      time: 5
   move:
     duration:
-      time: 1000
+      time: 1
 
 websocket:
   unity:
