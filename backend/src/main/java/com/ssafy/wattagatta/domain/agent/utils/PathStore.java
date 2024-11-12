@@ -52,7 +52,7 @@ public class PathStore {
             for (Map.Entry<Integer, Node> posEntry : agentPositionMap.entrySet()) {
                 int timeStep = posEntry.getKey();
                 Node node = posEntry.getValue();
-                constraints.add(Constraint.createVertexConstraint(currentAgentId, node, timeStep));
+                constraints.add(Constraint.createVertexConstraint(agentId, node, timeStep));
             }
 
             List<Integer> sortedTimeSteps = new ArrayList<>(agentPositionMap.keySet());
@@ -62,7 +62,7 @@ public class PathStore {
                 int previousTime = sortedTimeSteps.get(i - 1);
                 Node fromNode = agentPositionMap.get(previousTime);
                 Node toNode = agentPositionMap.get(currentTime);
-                constraints.add(Constraint.createEdgeConstraint(currentAgentId, fromNode, toNode, currentTime));
+                constraints.add(Constraint.createEdgeConstraint(agentId, fromNode, toNode, currentTime));
             }
         }
         return constraints;
