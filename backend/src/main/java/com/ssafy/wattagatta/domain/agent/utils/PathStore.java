@@ -11,6 +11,7 @@ import java.util.Map;
 public class PathStore {
 
     private final Map<String, Map<Integer, Node>> agentPaths = Collections.synchronizedMap(new HashMap<>());
+    private final List<Constraint> globalConstraints = new ArrayList<>();
 
     public void setPosition(String agentId, int timeStep, Node position) {
         agentPaths.computeIfAbsent(agentId, k -> Collections.synchronizedMap(new HashMap<>())).put(timeStep, position);
