@@ -141,10 +141,10 @@ public class AStar {
             return null;
         }
 
-        if (!isValidEdge(currentState.node, nextNode)) {
-            log.info("InValidEdge ");
-            return null;
-        }
+//        if (!isValidEdge(currentState.node, nextNode)) {
+//            log.info("InValidEdge ");
+//            return null;
+//        }
 
         double h = heuristic(nextNode, goalNode);
         return State.getNextState(currentState, nextTimeStep, gCost, h, nextNode);
