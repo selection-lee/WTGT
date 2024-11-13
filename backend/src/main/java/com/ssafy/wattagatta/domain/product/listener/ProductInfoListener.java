@@ -23,7 +23,7 @@ public class ProductInfoListener {
         try {
             log.info("수신한 ProductInfo {}", productInfoMessage);
             productLogRepository.save(ProductLogEntity.fromInfo(productInfoMessage));
-            queue.add(BaseSector.getLocationByRegionCode(productInfoMessage.regionCode()));
+            queue.put(BaseSector.getLocationByRegionCode(productInfoMessage.regionCode()));
         } catch (Exception e) {
             log.error("작업할당 중 에러 발생", e);
         }
@@ -31,5 +31,16 @@ public class ProductInfoListener {
 
     public TargetLoc getTargetLoc() throws InterruptedException {
         return queue.take();
+    }
+
+
+    public void requeueFailedTask(TargetLoc targetLoc) {
+        try {
+            queue.put(targetLoc);
+            log.info("실패한 작업을 큐에 다시 추가 : {}", targetLoc);
+        } catch (InterruptedException e) {
+            log.error("작업 재큐 중 에러 발생", e);
+            Thread.currentThread().interrupt();
+        }
     }
 }

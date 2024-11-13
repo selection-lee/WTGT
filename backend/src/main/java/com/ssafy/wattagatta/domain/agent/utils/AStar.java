@@ -9,7 +9,6 @@ import com.ssafy.wattagatta.domain.agent.model.Direction;
 import com.ssafy.wattagatta.domain.agent.model.Node;
 import com.ssafy.wattagatta.domain.agent.model.State;
 import com.ssafy.wattagatta.domain.agent.model.StateKey;
-import com.ssafy.wattagatta.global.utils.GlobalClock;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,13 +16,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AStar {
-
-    private final GlobalClock globalClock;
 
     public List<Node> findPath(Agent agent, List<Constraint> constraints) {
         PriorityQueue<State> openList = new PriorityQueue<>();
@@ -90,11 +89,7 @@ public class AStar {
     public double heuristic(Node currentNode, Node goalNode) {
         int dx = Math.abs(currentNode.getX() - goalNode.getX());
         int dy = Math.abs(currentNode.getY() - goalNode.getY());
-        int distance = dx + dy;
-
-        int directionCost = (currentNode.getDirection() != goalNode.getDirection()) ? 1 : 0;
-
-        return distance + directionCost;
+        return dx + dy;
     }
 
     public List<Node> reconstructPath(State state, int waitTime) {
@@ -127,11 +122,11 @@ public class AStar {
                 break;
             case TURN_LEFT:
                 nextDirection = currentState.direction.turnLeft();
-                gCost += 1;
+                gCost += 2;
                 break;
             case TURN_RIGHT:
                 nextDirection = currentState.direction.turnRight();
-                gCost += 1;
+                gCost += 2;
                 break;
             case WAIT:
                 gCost += 0.5;
@@ -140,11 +135,16 @@ public class AStar {
                 return null;
         }
 
+        Node nextNode = new Node(nextX, nextY, nextDirection);
+
         if (!isValidPosition(nextX, nextY)) {
             return null;
         }
 
-        Node nextNode = new Node(nextX, nextY, nextDirection);
+//        if (!isValidEdge(currentState.node, nextNode)) {
+//            log.info("InValidEdge ");
+//            return null;
+//        }
 
         double h = heuristic(nextNode, goalNode);
         return State.getNextState(currentState, nextTimeStep, gCost, h, nextNode);
@@ -156,10 +156,38 @@ public class AStar {
         return x >= 0 && x < gridWidth && y >= 0 && y < gridHeight;
     }
 
+    public boolean isValidEdge(Node fromNode, Node toNode) {
+        int gridWidth = 9;
+        int gridHeight = 9;
+
+        int fromX = fromNode.getX();
+        int fromY = fromNode.getY();
+        int toX = toNode.getX();
+        int toY = toNode.getY();
+
+        boolean fromIsEdge = (fromX == 0 || fromX == gridWidth - 1 || fromY == 0 || fromY == gridHeight - 1);
+        boolean toIsEdge = (toX == 0 || toX == gridWidth - 1 || toY == 0 || toY == gridHeight - 1);
+
+        if (fromIsEdge && toIsEdge) {
+            if (fromY == toY && Math.abs(fromX - toX) == 1) {
+                log.info("InValidEdge due to movement between edge nodes on same row from ({},{}) to ({},{})", fromX,
+                        fromY, toX, toY);
+                return false;
+            }
+            if (fromX == toX && Math.abs(fromY - toY) == 1) {
+                log.info("InValidEdge due to movement between edge nodes on same column from ({},{}) to ({},{})", fromX,
+                        fromY, toX, toY);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public boolean isConstrained(String agentId, Node fromNode, Node toNode, int timeStep,
                                  List<Constraint> constraints) {
         for (Constraint constraint : constraints) {
-            if (!constraint.getAgentId().equals(agentId)) {
+            if (constraint.getAgentId().equals(agentId)) {
                 continue;
             }
 
@@ -168,11 +196,12 @@ public class AStar {
             }
 
             if (constraint.getType() == ConstraintType.VERTEX) {
-                if (constraint.getNode().equals(toNode)) {
+                if (constraint.getNode().equalsPosition(toNode)) {
                     return true;
                 }
             } else if (constraint.getType() == ConstraintType.EDGE) {
-                if (constraint.getFromNode().equals(fromNode) && constraint.getToNode().equals(toNode)) {
+                if (constraint.getFromNode().equalsPosition(fromNode) && constraint.getToNode()
+                        .equalsPosition(toNode)) {
                     return true;
                 }
             }

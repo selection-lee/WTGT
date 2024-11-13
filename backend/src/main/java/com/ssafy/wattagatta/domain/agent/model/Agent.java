@@ -52,8 +52,8 @@ public class Agent {
         this.startTime = currentGlobalTime;
     }
 
-    public void moveAlongPath(Consumer<Node> positionUpdateCallback, Runnable onPathComplete, Runnable onTaskComplete,
-                              Consumer<Node> returnPositionUpdateCallback, Runnable onReturnComplete) {
+    public void moveAlongPath(Consumer<Node> positionUpdateCallback, Runnable onTaskStart, Runnable onTaskComplete,
+                              Runnable onReturnComplete) {
         if (isMoving || currentPath == null || currentPath.isEmpty()) {
             return;
         }
@@ -65,16 +65,18 @@ public class Agent {
                     Node nextNode = currentPath.remove(0);
                     setCurrentNode(nextNode);
                     positionUpdateCallback.accept(nextNode);
+
+                    if (status == AgentStatus.MOVING_TO_TARGET && nextNode.equals(goalNode)) {
+                        status = AgentStatus.PERFORMING_TASK;
+                        onTaskStart.run();
+                        performTask(5);
+                        onTaskComplete.run();
+                        status = AgentStatus.RETURNING_HOME;
+                    }
+
                     Thread.sleep(1000);
                 }
-                onPathComplete.run();
-                onTaskComplete.run();
-                while (!currentPath.isEmpty()) {
-                    Node nextNode = currentPath.remove(0);
-                    setCurrentNode(nextNode);
-                    returnPositionUpdateCallback.accept(nextNode);
-                    Thread.sleep(1000);
-                }
+                // 복귀 완료
                 onReturnComplete.run();
             } catch (InterruptedException e) {
                 log.error("이동 중 예외 발생", e);

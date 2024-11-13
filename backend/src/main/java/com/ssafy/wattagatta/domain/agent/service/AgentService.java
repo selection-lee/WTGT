@@ -24,7 +24,11 @@ public class AgentService {
             while (true) {
                 try {
                     Agent availableAgent = agentManager.waitForAvailableAgent();
-                    agentManager.assignTaskToAgent(availableAgent, productInfoListener.getTargetLoc());
+                    agentManager.assignTaskToAgent(
+                            availableAgent,
+                            productInfoListener.getTargetLoc(),
+                            productInfoListener::requeueFailedTask
+                    );
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;

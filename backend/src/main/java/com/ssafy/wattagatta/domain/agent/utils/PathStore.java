@@ -11,6 +11,7 @@ import java.util.Map;
 public class PathStore {
 
     private final Map<String, Map<Integer, Node>> agentPaths = Collections.synchronizedMap(new HashMap<>());
+    private final List<Constraint> globalConstraints = new ArrayList<>();
 
     public void setPosition(String agentId, int timeStep, Node position) {
         agentPaths.computeIfAbsent(agentId, k -> Collections.synchronizedMap(new HashMap<>())).put(timeStep, position);
@@ -52,7 +53,7 @@ public class PathStore {
             for (Map.Entry<Integer, Node> posEntry : agentPositionMap.entrySet()) {
                 int timeStep = posEntry.getKey();
                 Node node = posEntry.getValue();
-                constraints.add(Constraint.createVertexConstraint(currentAgentId, node, timeStep));
+                constraints.add(Constraint.createVertexConstraint(agentId, node, timeStep));
             }
 
             List<Integer> sortedTimeSteps = new ArrayList<>(agentPositionMap.keySet());
@@ -62,7 +63,7 @@ public class PathStore {
                 int previousTime = sortedTimeSteps.get(i - 1);
                 Node fromNode = agentPositionMap.get(previousTime);
                 Node toNode = agentPositionMap.get(currentTime);
-                constraints.add(Constraint.createEdgeConstraint(currentAgentId, fromNode, toNode, currentTime));
+                constraints.add(Constraint.createEdgeConstraint(agentId, fromNode, toNode, currentTime));
             }
         }
         return constraints;
