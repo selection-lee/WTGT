@@ -52,8 +52,8 @@ public class AgentManager {
         this.agents = new ArrayList<>();
         this.pathStore = new PathStore();
         objectMapper = new ObjectMapper();
-        agent1.ready("agent1", new Node(0, 1, Direction.EAST));
-        agent2.ready("agent2", new Node(0, 2, Direction.EAST));
+        agent1.ready("agent1", new Node(0, 0, Direction.EAST));
+        agent2.ready("agent2", new Node(0, 1, Direction.EAST));
         agents.add(agent1);
         agents.add(agent2);
         this.webSocketSessionManager = webSocketSessionManager;
@@ -109,15 +109,18 @@ public class AgentManager {
 
                     boolean arrived = false;
                     boolean conveyArrived = false;
-                    if (i == pathToTargetSize - (TASK_DURATION_TIME + 1) || i == fullPath.size() - (TASK_DURATION_TIME
-                            + 1)) {
+                    boolean houseArrived = false;
+                    if (i == pathToTargetSize - (TASK_DURATION_TIME + 1)) {
                         arrived = true;
+                    }
+                    if (i == fullPath.size() - (TASK_DURATION_TIME + 1)) {
+                        houseArrived = true;
                     }
                     if (i == conveyPathSize - (TASK_DURATION_TIME + 1)) {
                         conveyArrived = true;
                     }
 
-                    sendAgentLocationUpdate(agent, currentNode, angle, arrived, conveyArrived);
+                    sendAgentLocationUpdate(agent, currentNode, angle, arrived, conveyArrived, houseArrived);
 
                     agent.setCurrentNode(currentNode);
                     previousNode = currentNode;
@@ -223,7 +226,7 @@ public class AgentManager {
     }
 
     private void sendAgentLocationUpdate(Agent agent, Node nextNode, int angle, boolean arrived,
-                                         boolean conveyArrived) {
+                                         boolean conveyArrived, boolean houseArrived) {
         try {
             AgentPositionResponse rcCarPosition = new AgentPositionResponse(
                     nextNode.getX(),
@@ -235,7 +238,8 @@ public class AgentManager {
                     rcCarPosition,
                     angle,
                     arrived,
-                    conveyArrived
+                    conveyArrived,
+                    houseArrived
             );
 
             String jsonMessage = objectMapper.writeValueAsString(response);
