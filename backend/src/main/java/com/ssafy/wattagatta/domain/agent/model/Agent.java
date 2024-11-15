@@ -30,7 +30,7 @@ public class Agent {
         this.startTime = 0;
         this.homeNode = homeNode;
         this.currentNode = homeNode;
-        this.conveyNode = new Node(2, 0, Direction.EAST);
+        this.conveyNode = new Node(0, 1, Direction.EAST);
         this.goalNode = null;
         this.status = AgentStatus.IDLE;
         this.currentPath = new ArrayList<>();
