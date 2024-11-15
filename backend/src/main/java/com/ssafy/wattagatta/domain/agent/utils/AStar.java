@@ -151,9 +151,9 @@ public class AStar {
     }
 
     public boolean isValidPosition(int x, int y) {
-        int gridWidth = 9;
-        int gridHeight = 9;
-        return x >= 0 && x < gridWidth && y >= 0 && y < gridHeight;
+        int gridWidth = 8;
+        int gridHeight = 8;
+        return x >= 0 && x <= gridWidth && y >= 0 && y <= gridHeight;
     }
 
     public boolean isValidEdge(Node fromNode, Node toNode) {

@@ -19,5 +19,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(agentWebSocketHandler, "/ws/rccar").setAllowedOrigins("*");
+        registry.addHandler(agentWebSocketHandler, "/ws/agent").setAllowedOrigins("*");
     }
 }
