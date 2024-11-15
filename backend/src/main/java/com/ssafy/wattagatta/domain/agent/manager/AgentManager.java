@@ -53,7 +53,7 @@ public class AgentManager {
         this.pathStore = new PathStore();
         objectMapper = new ObjectMapper();
         agent1.ready("agent1", new Node(0, 0, Direction.EAST));
-        agent2.ready("agent2", new Node(0, 1, Direction.EAST));
+        agent2.ready("agent2", new Node(1, 0, Direction.EAST));
         agents.add(agent1);
         agents.add(agent2);
         this.webSocketSessionManager = webSocketSessionManager;
@@ -256,9 +256,9 @@ public class AgentManager {
         if (currentNode.getDirection() == nextNode.getDirection()) {
             return 1; // 직진
         } else if (isRightTurn(currentNode.getDirection(), nextNode.getDirection())) {
-            return 2; // 우회전
+            return 0; // 우회전, Unity 입장 좌회전
         } else {
-            return 0; // 좌회전
+            return 2; // 좌회전, Unity 입장 우회전
         }
     }
 
