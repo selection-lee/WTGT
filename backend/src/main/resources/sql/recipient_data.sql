@@ -1,0 +1,11 @@
+INSERT INTO recipient (name, email, phone, address) VALUES
+('Alice Johnson', 'alice.johnson@example.com', '010-1234-5678', '123 Maple Street, Seoul'),
+('Bob Smith', 'bob.smith@example.com', '010-2345-6789', '456 Oak Avenue, Busan'),
+('Charlie Brown', 'charlie.brown@example.com', '010-3456-7890', '789 Pine Lane, Incheon'),
+('David Lee', 'david.lee@example.com', '010-4567-8901', '101 Cherry Blvd, Gwangju'),
+('Eve Kim', 'eve.kim@example.com', '010-5678-9012', '202 Walnut Drive, Daegu'),
+('Frank Wilson', 'frank.wilson@example.com', '010-6789-0123', '303 Cedar Court, Daejeon'),
+('Grace Park', 'grace.park@example.com', '010-7890-1234', '404 Birch Circle, Ulsan'),
+('Hannah Miller', 'hannah.miller@example.com', '010-8901-2345', '505 Elm Street, Jeonju'),
+('Ian Taylor', 'ian.taylor@example.com', '010-9012-3456', '606 Spruce Avenue, Gyeonggi'),
+('Jane Doe', 'jane.doe@example.com', '010-0123-4567', '707 Aspen Road, Jeju');
