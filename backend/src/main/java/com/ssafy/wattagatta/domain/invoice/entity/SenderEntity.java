@@ -39,4 +39,13 @@ public class SenderEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "senderEntity", fetch = FetchType.LAZY)
     private Set<InvoiceEntity> invoiceEntities;
+
+    public static SenderEntity defaultCreate() {
+        SenderEntity sender = new SenderEntity();
+        sender.name = "samsung electronics";
+        sender.email = "samsung@ssafy.com";
+        sender.phone = "010-1234-5678";
+        sender.address = "삼성전자 사업장";
+        return sender;
+    }
 }

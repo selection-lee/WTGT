@@ -55,4 +55,19 @@ public class InvoiceEntity {
     @OneToMany(mappedBy = "invoiceEntity", fetch = FetchType.LAZY)
     private Set<ProductEntity> productEntities;
 
+    public static InvoiceEntity createInvoice(String invoiceNumber,
+                                              SenderEntity sender,
+                                              RecipientEntity recipient,
+                                              int totalPrice) {
+        InvoiceEntity invoice = new InvoiceEntity();
+        invoice.invoiceNumber = invoiceNumber;
+        invoice.issueDate = LocalDateTime.now();
+        invoice.dueDate = LocalDateTime.now().plusDays(7);
+        invoice.shippingFee = 5000;
+        invoice.tax = 1000;
+        invoice.totalAmount = totalPrice + 5000 + 1000;
+        invoice.senderEntity = sender;
+        invoice.recipientEntity = recipient;
+        return invoice;
+    }
 }
