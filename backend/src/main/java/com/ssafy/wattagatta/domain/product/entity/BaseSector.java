@@ -10,14 +10,14 @@ import lombok.Getter;
  */
 @Getter
 public enum BaseSector {
-    A("서울특별시", new TargetLoc(8, 0)),
-    B("부산광역시", new TargetLoc(8, 1)),
-    C("대전광역시", new TargetLoc(8, 2)),
-    D("경상북도", new TargetLoc(8, 3)),
-    E("광주광역시", new TargetLoc(8, 5)),
-    F("인천광역시", new TargetLoc(8, 6)),
-    G("대구광역시", new TargetLoc(8, 7)),
-    H("경기도", new TargetLoc(8, 8)),
+    A("서울특별시", new TargetLoc(7, 0)),
+    B("부산광역시", new TargetLoc(7, 1)),
+    C("대전광역시", new TargetLoc(7, 2)),
+    D("경상북도", new TargetLoc(7, 3)),
+    E("광주광역시", new TargetLoc(7, 5)),
+    F("인천광역시", new TargetLoc(7, 6)),
+    G("대구광역시", new TargetLoc(7, 7)),
+    H("경기도", new TargetLoc(7, 8)),
     I("강원도", new TargetLoc(9, 9)),
     J("경상남도", new TargetLoc(9, 9)),
     K("울산광역시", new TargetLoc(9, 9)),
