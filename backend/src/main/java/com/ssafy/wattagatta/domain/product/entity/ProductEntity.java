@@ -1,6 +1,7 @@
 package com.ssafy.wattagatta.domain.product.entity;
 
 import com.ssafy.wattagatta.domain.invoice.entity.InvoiceEntity;
+import com.ssafy.wattagatta.domain.order.dto.request.AddOrderRequest;
 import com.ssafy.wattagatta.domain.product.dto.response.ProductResponse;
 import com.ssafy.wattagatta.global.common.BaseEntity;
 import jakarta.persistence.Column;
@@ -84,5 +85,22 @@ public class ProductEntity extends BaseEntity {
                 product.getAreaEntity().getAreaName().name(),
                 product.getExpectedArrivalDate()
         );
+    }
+
+    public static ProductEntity from(AddOrderRequest request,
+                                     CategoryEntity category,
+                                     InvoiceEntity invoice,
+                                     AreaEntity area){
+        ProductEntity product = new ProductEntity();
+        product.productName = request.productName();
+        product.quantity = request.productQuantity();
+        product.unitPrice = request.unitPrice();
+        product.totalPrice = request.totalPrice();
+        product.expectedArrivalDate = request.expectedArrivalDate();
+        product.categoryEntity = category;
+        product.invoiceEntity = invoice;
+        product.areaEntity = area;
+        product.productStatus = ProductStatus.PENDING_ARRIVAL;
+        return product;
     }
 }
