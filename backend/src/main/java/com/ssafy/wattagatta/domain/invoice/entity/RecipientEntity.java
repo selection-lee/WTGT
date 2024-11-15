@@ -39,4 +39,13 @@ public class RecipientEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "recipientEntity", fetch = FetchType.LAZY)
     private Set<InvoiceEntity> invoiceEntities;
+
+    public static RecipientEntity defaultCreate() {
+        RecipientEntity recipient = new RecipientEntity();
+        recipient.name = "SSAFY";
+        recipient.email = "SSAFY@ssafy.com";
+        recipient.phone = "010-5161-5432";
+        recipient.address = "삼성전자 광주 사업장 그린캠퍼스";
+        return recipient;
+    }
 }
