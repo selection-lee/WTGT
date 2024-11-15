@@ -6,6 +6,7 @@ import com.ssafy.wattagatta.domain.agent.dto.response.AgentPositionResponse;
 import com.ssafy.wattagatta.domain.agent.model.Agent;
 import com.ssafy.wattagatta.domain.agent.model.AgentStatus;
 import com.ssafy.wattagatta.domain.agent.model.Constraint;
+import com.ssafy.wattagatta.domain.agent.model.ConveyPath;
 import com.ssafy.wattagatta.domain.agent.model.Direction;
 import com.ssafy.wattagatta.domain.agent.model.Node;
 import com.ssafy.wattagatta.domain.agent.service.PathCalcService;
@@ -51,8 +52,8 @@ public class AgentManager {
         this.agents = new ArrayList<>();
         this.pathStore = new PathStore();
         objectMapper = new ObjectMapper();
-        agent1.ready("agent1", new Node(1, 0, Direction.EAST));
-        agent2.ready("agent2", new Node(0, 1, Direction.EAST));
+        agent1.ready("agent1", new Node(0, 1, Direction.EAST));
+        agent2.ready("agent2", new Node(0, 2, Direction.EAST));
         agents.add(agent1);
         agents.add(agent2);
         this.webSocketSessionManager = webSocketSessionManager;
@@ -65,7 +66,10 @@ public class AgentManager {
 
             // 작업 경로 계산
             List<Constraint> constraints = pathStore.getConstraintsForAgent(agent.getId());
-            List<Node> pathToTarget = calcAgentPathToTarget(agent, constraints);
+            ConveyPath conveyPath = calcAgentPathToTarget(agent, constraints);
+
+            List<Node> pathToTarget = conveyPath.getPath();
+            int conveyPathSize = conveyPath.getConveyPathSize();
 
             // 복귀 경로 계산
             List<Node> returnPath = calcAgentReturnPath(agent, constraints);
@@ -75,11 +79,12 @@ public class AgentManager {
 
             List<Node> fullPath = assignFullPathToAgent(agent, pathToTarget, returnPath);
             pathStore.savePath(agent.getId(), currentGlobalTime, fullPath);
+
             List<Constraint> constraints1 = pathStore.getConstraintsForAgent("1");
             log.info("에이전트 전체 설정 경로 : {}", agent.getCurrentPath());
             log.info("등록된 constraint : {}", constraints1);
 
-            simulateAgentMovement(agent, fullPath, pathToTarget.size());
+            simulateAgentMovement(agent, fullPath, pathToTarget.size(), conveyPathSize);
         } catch (CustomException e) {
             log.error("에이전트 {}가 경로를 찾지 못했습니다: {}", agent.getId(), e.getMessage());
             agent.setStatus(AgentStatus.IDLE);
@@ -87,7 +92,7 @@ public class AgentManager {
         }
     }
 
-    private void simulateAgentMovement(Agent agent, List<Node> fullPath, int pathToTargetSize) {
+    private void simulateAgentMovement(Agent agent, List<Node> fullPath, int pathToTargetSize, int conveyPathSize) {
         new Thread(() -> {
             try {
                 Node previousNode = null;
@@ -103,11 +108,16 @@ public class AgentManager {
                     }
 
                     boolean arrived = false;
-                    if (i == pathToTargetSize - 1 || i == fullPath.size() - 1) {
+                    boolean conveyArrived = false;
+                    if (i == pathToTargetSize - (TASK_DURATION_TIME + 1) || i == fullPath.size() - (TASK_DURATION_TIME
+                            + 1)) {
                         arrived = true;
                     }
+                    if (i == conveyPathSize - (TASK_DURATION_TIME + 1)) {
+                        conveyArrived = true;
+                    }
 
-                    sendAgentLocationUpdate(agent, currentNode, angle, arrived);
+                    sendAgentLocationUpdate(agent, currentNode, angle, arrived, conveyArrived);
 
                     agent.setCurrentNode(currentNode);
                     previousNode = currentNode;
@@ -125,13 +135,38 @@ public class AgentManager {
     }
 
 
-    private List<Node> calcAgentPathToTarget(Agent agent, List<Constraint> constraints) {
-        List<Node> pathToTarget = pathCalcService.calcPath(agent, constraints);
-        if (pathToTarget == null) {
+    private ConveyPath calcAgentPathToTarget(Agent agent, List<Constraint> constraints) {
+        Node originalGoalNode = agent.getGoalNode();
+        Node originalCurrentNode = agent.getCurrentNode();
+
+        agent.setGoalNode(agent.getConveyNode());
+        List<Node> pathToConvey = pathCalcService.calcPath(agent, constraints);
+
+        if (pathToConvey == null) {
             agent.setStatus(AgentStatus.IDLE);
             throw new CustomException(ErrorCode.CANNOT_FIND_NEW_PATH);
         }
-        return pathToTarget;
+
+        agent.setCurrentNode(agent.getConveyNode());
+        agent.setGoalNode(originalGoalNode);
+        List<Node> pathFromConveyToGoal = pathCalcService.calcPath(agent, constraints);
+        if (pathFromConveyToGoal == null) {
+            agent.setStatus(AgentStatus.IDLE);
+            throw new CustomException(ErrorCode.CANNOT_FIND_NEW_PATH);
+        }
+
+        if (!pathFromConveyToGoal.isEmpty() && pathFromConveyToGoal.get(0)
+                .equals(pathToConvey.get(pathToConvey.size() - 1))) {
+            pathFromConveyToGoal.remove(0);
+        }
+
+        List<Node> fullPath = new ArrayList<>();
+        fullPath.addAll(pathToConvey);
+        fullPath.addAll(pathFromConveyToGoal);
+
+        agent.setCurrentNode(originalCurrentNode);
+
+        return new ConveyPath(fullPath, pathToConvey.size());
     }
 
 
@@ -187,7 +222,8 @@ public class AgentManager {
         log.info("agent 작업 완료 notify All");
     }
 
-    private void sendAgentLocationUpdate(Agent agent, Node nextNode, int angle, boolean arrived) {
+    private void sendAgentLocationUpdate(Agent agent, Node nextNode, int angle, boolean arrived,
+                                         boolean conveyArrived) {
         try {
             AgentPositionResponse rcCarPosition = new AgentPositionResponse(
                     nextNode.getX(),
@@ -198,7 +234,8 @@ public class AgentManager {
                     Integer.parseInt(agent.getId().replace("agent", "")),
                     rcCarPosition,
                     angle,
-                    arrived
+                    arrived,
+                    conveyArrived
             );
 
             String jsonMessage = objectMapper.writeValueAsString(response);

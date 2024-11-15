@@ -81,6 +81,7 @@ public class AgentWebSocketHandler extends TextWebSocketHandler {
                 agentId,
                 agentPosition,
                 1,
+                false,
                 false
         );
         String message = objectMapper.writeValueAsString(carData);

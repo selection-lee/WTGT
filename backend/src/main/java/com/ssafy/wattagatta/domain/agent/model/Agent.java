@@ -17,6 +17,7 @@ public class Agent {
     private String id;
     private int startTime;
     private Node currentNode;
+    private Node conveyNode;
     private Node goalNode;
     private Node homeNode;
     private AgentStatus status;
@@ -29,6 +30,7 @@ public class Agent {
         this.startTime = 0;
         this.homeNode = homeNode;
         this.currentNode = homeNode;
+        this.conveyNode = new Node(2, 0, Direction.EAST);
         this.goalNode = null;
         this.status = AgentStatus.IDLE;
         this.currentPath = new ArrayList<>();
