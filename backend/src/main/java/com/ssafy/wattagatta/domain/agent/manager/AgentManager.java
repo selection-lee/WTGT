@@ -284,6 +284,19 @@ public class AgentManager {
             List<Integer> routeToTarget = routeActions.subList(targetPathStartIndex, targetPathEndIndex);
             List<Integer> routeToHome = routeActions.subList(returnHomeStartIndex, routeActionsSize);
 
+            Direction startingDirectionToConvey = agent.getCurrentDirection();
+            Direction startingDirectionToTarget = Direction.NORTH;
+            Direction startingDirectionToHome = Direction.SOUTH;
+
+            routeToConvey = adjustRoute(
+                    routeToConvey, fullPath, startingDirectionToConvey, 0);
+
+            routeToTarget = adjustRoute(
+                    routeToTarget, fullPath, startingDirectionToTarget, targetPathStartIndex);
+
+            routeToHome = adjustRoute(
+                    routeToHome, fullPath, startingDirectionToHome, returnHomeStartIndex);
+
             sendRouteSegment(carNumber, 1, routeToConvey);
             sendRouteSegment(carNumber, 2, routeToTarget);
             sendRouteSegment(carNumber, 3, routeToHome);
@@ -347,6 +360,56 @@ public class AgentManager {
             return 0;
         }
     }
+
+
+    /**
+     * Rc car 방향 전환 고려한 경로
+     * @param routeSegment
+     * @param fullPath
+     * @param startingDirection
+     * @param segmentStartIndex
+     * @return
+     */
+    private List<Integer> adjustRoute(
+            List<Integer> routeSegment, List<Node> fullPath, Direction startingDirection, int segmentStartIndex) {
+
+        if (routeSegment.isEmpty() || segmentStartIndex >= fullPath.size() - 1) {
+            return routeSegment;
+        }
+
+        // 첫 번째 이동을 위한 필요한 방향 계산
+        Node firstNode = fullPath.get(segmentStartIndex);
+        Node secondNode = fullPath.get(segmentStartIndex + 1);
+
+        Direction requiredDirection = calculateDirection(firstNode, secondNode);
+
+        if (startingDirection == requiredDirection) {
+            // 시작 방향이 이미 이동에 필요한 방향과 같으므로 첫 번째 방향 전환 명령 제거
+            if (routeSegment.get(0) == 2 || routeSegment.get(0) == 3) {
+                // 새로운 리스트를 만들어 반환 (ImmutableList 대응)
+                routeSegment = routeSegment.subList(1, routeSegment.size());
+            }
+        }
+
+        return routeSegment;
+    }
+
+    private Direction calculateDirection(Node fromNode, Node toNode) {
+        int dx = toNode.getX() - fromNode.getX();
+        int dy = toNode.getY() - fromNode.getY();
+
+        if (dx == 1 && dy == 0) {
+            return Direction.NORTH;
+        } else if (dx == -1 && dy == 0) {
+            return Direction.SOUTH;
+        } else if (dx == 0 && dy == 1) {
+            return Direction.EAST;
+        } else if (dx == 0 && dy == -1) {
+            return Direction.WEST;
+        }
+        return fromNode.getDirection();
+    }
+
 
     private boolean isLeftTurn(Direction current, Direction next) {
         return (current == Direction.NORTH && next == Direction.WEST)
