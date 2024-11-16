@@ -3,6 +3,7 @@ package com.ssafy.wattagatta.domain.agent.manager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.wattagatta.domain.agent.dto.response.AgentDataResponse;
 import com.ssafy.wattagatta.domain.agent.dto.response.AgentPositionResponse;
+import com.ssafy.wattagatta.domain.agent.dto.response.AgentRouteResponse;
 import com.ssafy.wattagatta.domain.agent.model.Agent;
 import com.ssafy.wattagatta.domain.agent.model.AgentStatus;
 import com.ssafy.wattagatta.domain.agent.model.Constraint;
@@ -43,7 +44,10 @@ public class AgentManager {
     private int MOVE_DURATION_TIME;
 
     @Value("${websocket.unity.path}")
-    private String path;
+    private String unityPath;
+
+    @Value("${websocket.agent.path}")
+    private String agentPath;
 
     public AgentManager(PathCalcService pathCalcService, GlobalClock globalClock,
                         WebSocketSessionManager webSocketSessionManager) {
@@ -66,8 +70,8 @@ public class AgentManager {
 
             // 작업 경로 계산
             List<Constraint> constraints = pathStore.getConstraintsForAgent(agent.getId());
-            ConveyPath conveyPath = calcAgentPathToTarget(agent, constraints);
 
+            ConveyPath conveyPath = calcAgentPathToTarget(agent, constraints);
             List<Node> pathToTarget = conveyPath.getPath();
             int conveyPathSize = conveyPath.getConveyPathSize();
 
@@ -78,11 +82,12 @@ public class AgentManager {
             log.info("에이전트 {}의 복귀 경로 : {}", agent.getId(), returnPath);
 
             List<Node> fullPath = assignFullPathToAgent(agent, pathToTarget, returnPath);
-            pathStore.savePath(agent.getId(), currentGlobalTime, fullPath);
 
-            List<Constraint> constraints1 = pathStore.getConstraintsForAgent("1");
+            pathStore.savePath(agent.getId(), currentGlobalTime, fullPath);
             log.info("에이전트 전체 설정 경로 : {}", agent.getCurrentPath());
-            log.info("등록된 constraint : {}", constraints1);
+
+            int targetPathSize = pathToTarget.size();
+            sendAgentRoute(agent, fullPath, conveyPathSize, targetPathSize);
 
             simulateAgentMovement(agent, fullPath, pathToTarget.size(), conveyPathSize);
         } catch (CustomException e) {
@@ -102,7 +107,7 @@ public class AgentManager {
 
                     Thread.sleep(1000);
 
-                    int angle = 0;
+                    int angle = 1;
                     if (previousNode != null) {
                         angle = calculateAngle(previousNode, currentNode);
                     }
@@ -244,7 +249,7 @@ public class AgentManager {
 
             String jsonMessage = objectMapper.writeValueAsString(response);
 //            log.info("Unity 전송 데이터 : {}", jsonMessage);
-            if (!webSocketSessionManager.sendMessageToPath(path, jsonMessage)) {
+            if (!webSocketSessionManager.sendMessageToPath(unityPath, jsonMessage)) {
                 log.error("메시지 전송 실패");
             }
         } catch (Exception e) {
@@ -252,14 +257,102 @@ public class AgentManager {
         }
     }
 
+    /**
+     * RC Car 메시지 전송 위한 메서드
+     * @param agent
+     * @param fullPath
+     * @param conveyPathSize
+     * @param targetPathSize
+     */
+    private void sendAgentRoute(Agent agent, List<Node> fullPath, int conveyPathSize, int targetPathSize) {
+        try {
+            int carNumber = Integer.parseInt(agent.getId().replace("agent", ""));
+
+            List<Integer> routeActions = generateRouteActions(fullPath);
+
+            int conveyWaitTime = TASK_DURATION_TIME;
+            int targetWaitTime = TASK_DURATION_TIME;
+            int homeWaitTime = TASK_DURATION_TIME;
+
+            int conveyPathEndIndex = conveyPathSize - 1 - conveyWaitTime;
+            int targetPathStartIndex = conveyPathEndIndex + TASK_DURATION_TIME;
+            int targetPathEndIndex = targetPathSize - 1 - targetWaitTime;
+            int returnHomeStartIndex = targetPathEndIndex + TASK_DURATION_TIME;
+            int routeActionsSize = routeActions.size() - homeWaitTime;
+
+            List<Integer> routeToConvey = routeActions.subList(0, conveyPathEndIndex);
+            List<Integer> routeToTarget = routeActions.subList(targetPathStartIndex, targetPathEndIndex);
+            List<Integer> routeToHome = routeActions.subList(returnHomeStartIndex, routeActionsSize);
+
+            sendRouteSegment(carNumber, 1, routeToConvey);
+            sendRouteSegment(carNumber, 2, routeToTarget);
+            sendRouteSegment(carNumber, 3, routeToHome);
+
+        } catch (Exception e) {
+            log.error("RCcar 메시지 전송 실패", e);
+        }
+    }
+
+    private void sendRouteSegment(int carNumber, int goal, List<Integer> routeSegment) {
+        try {
+            AgentRouteResponse response = new AgentRouteResponse(carNumber, goal, routeSegment);
+            String jsonMessage = objectMapper.writeValueAsString(response);
+
+            if (!webSocketSessionManager.sendMessageToPath(agentPath, jsonMessage)) {
+                log.error("RCcar 메시지 전송 실패");
+            }
+        } catch (Exception e) {
+            log.error("RCcar 메시지 전송 실패", e);
+        }
+    }
+
+
     private int calculateAngle(Node currentNode, Node nextNode) {
         if (currentNode.getDirection() == nextNode.getDirection()) {
             return 1; // 직진
         } else if (isRightTurn(currentNode.getDirection(), nextNode.getDirection())) {
-            return 0; // 우회전, Unity 입장 좌회전
+            return 2; // 우회전
         } else {
-            return 2; // 좌회전, Unity 입장 우회전
+            return 0; // 좌회전
         }
+    }
+
+    private List<Integer> generateRouteActions(List<Node> path) {
+        List<Integer> routeActions = new ArrayList<>();
+
+        for (int i = 0; i < path.size() - 1; i++) {
+            Node currentNode = path.get(i);
+            Node nextNode = path.get(i + 1);
+
+            int action = calculateAction(currentNode, nextNode);
+            routeActions.add(action);
+        }
+
+        routeActions.add(0);
+
+        return routeActions;
+    }
+
+    private int calculateAction(Node currentNode, Node nextNode) {
+        Direction currentDirection = currentNode.getDirection();
+        Direction nextDirection = nextNode.getDirection();
+
+        if (currentDirection == nextDirection) {
+            return 1;
+        } else if (isLeftTurn(currentDirection, nextDirection)) {
+            return 2;
+        } else if (isRightTurn(currentDirection, nextDirection)) {
+            return 3;
+        } else {
+            return 0;
+        }
+    }
+
+    private boolean isLeftTurn(Direction current, Direction next) {
+        return (current == Direction.NORTH && next == Direction.WEST)
+                || (current == Direction.WEST && next == Direction.SOUTH)
+                || (current == Direction.SOUTH && next == Direction.EAST)
+                || (current == Direction.EAST && next == Direction.NORTH);
     }
 
     private boolean isRightTurn(Direction current, Direction next) {
@@ -268,5 +361,7 @@ public class AgentManager {
                 || (current == Direction.SOUTH && next == Direction.WEST)
                 || (current == Direction.WEST && next == Direction.NORTH);
     }
+
+
 
 }

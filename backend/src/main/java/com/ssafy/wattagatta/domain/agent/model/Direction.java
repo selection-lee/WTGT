@@ -26,10 +26,10 @@ public enum Direction {
 
     public int[] moveForward(int x, int y) {
         return switch (this) {
-            case NORTH -> new int[]{x, y - 1};
-            case EAST -> new int[]{x + 1, y};
-            case SOUTH -> new int[]{x, y + 1};
-            case WEST -> new int[]{x - 1, y};
+            case NORTH -> new int[]{x + 1, y};
+            case EAST -> new int[]{x, y + 1};
+            case SOUTH -> new int[]{x - 1, y};
+            case WEST -> new int[]{x, y - 1};
         };
     }
 }
