@@ -278,7 +278,7 @@ public class AgentManager {
             int targetPathStartIndex = conveyPathEndIndex + TASK_DURATION_TIME;
             int targetPathEndIndex = targetPathSize - 1 - targetWaitTime;
             int returnHomeStartIndex = targetPathEndIndex + TASK_DURATION_TIME;
-            int routeActionsSize = routeActions.size() - homeWaitTime;
+            int routeActionsSize = routeActions.size() - 1 - homeWaitTime;
 
             List<Integer> routeToConvey = routeActions.subList(0, conveyPathEndIndex);
             List<Integer> routeToTarget = routeActions.subList(targetPathStartIndex, targetPathEndIndex);
@@ -366,32 +366,41 @@ public class AgentManager {
      * Rc car 방향 전환 고려한 경로
      * @param routeSegment
      * @param fullPath
-     * @param startingDirection
+     * @param desiredStartingDirection
      * @param segmentStartIndex
      * @return
      */
     private List<Integer> adjustRoute(
-            List<Integer> routeSegment, List<Node> fullPath, Direction startingDirection, int segmentStartIndex) {
+            List<Integer> routeSegment, List<Node> fullPath, Direction desiredStartingDirection, int segmentStartIndex) {
 
         if (routeSegment.isEmpty() || segmentStartIndex >= fullPath.size() - 1) {
             return routeSegment;
         }
 
-        // 첫 번째 이동을 위한 필요한 방향 계산
-        Node firstNode = fullPath.get(segmentStartIndex);
-        Node secondNode = fullPath.get(segmentStartIndex + 1);
+        int index = 0;
+        Direction currentDirection = desiredStartingDirection;
 
-        Direction requiredDirection = calculateDirection(firstNode, secondNode);
+        for (int i = segmentStartIndex; i < fullPath.size() - 1 && index < routeSegment.size(); i++) {
+            Node currentNode = fullPath.get(i);
+            Node nextNode = fullPath.get(i + 1);
 
-        if (startingDirection == requiredDirection) {
-            // 시작 방향이 이미 이동에 필요한 방향과 같으므로 첫 번째 방향 전환 명령 제거
-            if (routeSegment.get(0) == 2 || routeSegment.get(0) == 3) {
-                // 새로운 리스트를 만들어 반환 (ImmutableList 대응)
-                routeSegment = routeSegment.subList(1, routeSegment.size());
+            Direction requiredDirection = calculateDirection(currentNode, nextNode);
+
+            if (currentDirection != requiredDirection) {
+                if (routeSegment.get(index) == 2 || routeSegment.get(index) == 3) {
+                    index++;
+                    currentDirection = requiredDirection;
+                }
+                // 방향 전환 명령이 아니면 루프 종료
+                else break;
+
             }
+            // 원하는 방향으로 설정 완료
+            else break;
+
         }
 
-        return routeSegment;
+        return routeSegment.subList(index, routeSegment.size());
     }
 
     private Direction calculateDirection(Node fromNode, Node toNode) {
