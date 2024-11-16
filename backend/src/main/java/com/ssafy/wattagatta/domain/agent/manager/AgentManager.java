@@ -288,27 +288,26 @@ public class AgentManager {
             Direction startingDirectionToTarget = Direction.NORTH;
             Direction startingDirectionToHome = Direction.SOUTH;
 
-            routeToConvey = adjustRoute(
-                    routeToConvey, fullPath, startingDirectionToConvey, 0);
+            routeToConvey = adjustRoute(routeToConvey, fullPath, startingDirectionToConvey, 0);
+            routeToTarget = adjustRoute(routeToTarget, fullPath, startingDirectionToTarget, targetPathStartIndex);
+            routeToHome = adjustRoute(routeToHome, fullPath, startingDirectionToHome, returnHomeStartIndex);
 
-            routeToTarget = adjustRoute(
-                    routeToTarget, fullPath, startingDirectionToTarget, targetPathStartIndex);
+            List<Integer> abRouteToConvey = generateAbsoluteDirections(routeToConvey, startingDirectionToConvey);
+            List<Integer> abRouteToTarget = generateAbsoluteDirections(routeToTarget, startingDirectionToTarget);
+            List<Integer> abRouteToHome = generateAbsoluteDirections(routeToHome, startingDirectionToHome);
 
-            routeToHome = adjustRoute(
-                    routeToHome, fullPath, startingDirectionToHome, returnHomeStartIndex);
-
-            sendRouteSegment(carNumber, 1, routeToConvey);
-            sendRouteSegment(carNumber, 2, routeToTarget);
-            sendRouteSegment(carNumber, 3, routeToHome);
+            sendRouteSegment(carNumber, 1, routeToConvey, abRouteToConvey);
+            sendRouteSegment(carNumber, 2, routeToTarget, abRouteToTarget);
+            sendRouteSegment(carNumber, 3, routeToHome, abRouteToHome);
 
         } catch (Exception e) {
             log.error("RCcar 메시지 전송 실패", e);
         }
     }
 
-    private void sendRouteSegment(int carNumber, int goal, List<Integer> routeSegment) {
+    private void sendRouteSegment(int carNumber, int goal, List<Integer> routeSegment, List<Integer> abRouteSegment) {
         try {
-            AgentRouteResponse response = new AgentRouteResponse(carNumber, goal, routeSegment);
+            AgentRouteResponse response = new AgentRouteResponse(carNumber, goal, routeSegment, abRouteSegment);
             String jsonMessage = objectMapper.writeValueAsString(response);
 
             if (!webSocketSessionManager.sendMessageToPath(agentPath, jsonMessage)) {
@@ -402,6 +401,44 @@ public class AgentManager {
 
         return routeSegment.subList(index, routeSegment.size());
     }
+
+    /**
+     * 절대 방향
+     * @param routeSegment
+     * @param startingDirection
+     * @return
+     */
+    private List<Integer> generateAbsoluteDirections(List<Integer> routeSegment, Direction startingDirection) {
+        List<Integer> abRoute = new ArrayList<>();
+        Direction currentDirection = startingDirection;
+
+        for (Integer action : routeSegment) {
+            abRoute.add(directionToInt(currentDirection));
+
+            switch (action) {
+                case 2:
+                    currentDirection = currentDirection.turnLeft();
+                    break;
+                case 3:
+                    currentDirection = currentDirection.turnRight();
+                    break;
+                default:
+                    break;
+            }
+        }
+        return abRoute;
+    }
+
+    private int directionToInt(Direction direction) {
+        return switch (direction) {
+            case NORTH -> 0;
+            case EAST -> 1;
+            case SOUTH -> 2;
+            case WEST -> 3;
+            default -> -1;
+        };
+    }
+
 
     private Direction calculateDirection(Node fromNode, Node toNode) {
         int dx = toNode.getX() - fromNode.getX();
