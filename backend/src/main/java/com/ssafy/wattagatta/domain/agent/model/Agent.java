@@ -24,6 +24,7 @@ public class Agent {
     private List<Node> currentPath;
     private Direction currentDirection;
     private boolean isMoving;
+    private double batteryLevel;
 
     public void ready(String id, Node homeNode) {
         this.id = id;
@@ -36,6 +37,7 @@ public class Agent {
         this.currentPath = new ArrayList<>();
         this.currentDirection = Direction.EAST;
         this.isMoving = false;
+        this.batteryLevel = 60.0;
     }
 
     public boolean isAvailable() {
@@ -49,60 +51,11 @@ public class Agent {
         this.currentDirection = Direction.EAST;
     }
 
-    public void assignReturnHomeTask(int currentGlobalTime) {
-        this.goalNode = this.homeNode;
-        this.status = AgentStatus.RETURNING_HOME;
-        this.startTime = currentGlobalTime;
+    public void consumeBattery(int amount) {
+        this.batteryLevel = Math.max(0, this.batteryLevel - amount);
     }
 
-    public void moveAlongPath(Consumer<Node> positionUpdateCallback, Runnable onTaskStart, Runnable onTaskComplete,
-                              Runnable onReturnComplete) {
-        if (isMoving || currentPath == null || currentPath.isEmpty()) {
-            return;
-        }
-        isMoving = true;
-
-        new Thread(() -> {
-            try {
-                while (!currentPath.isEmpty()) {
-                    Node nextNode = currentPath.remove(0);
-                    setCurrentNode(nextNode);
-                    positionUpdateCallback.accept(nextNode);
-
-                    if (status == AgentStatus.MOVING_TO_TARGET && nextNode.equals(goalNode)) {
-                        status = AgentStatus.PERFORMING_TASK;
-                        onTaskStart.run();
-                        performTask(5);
-                        onTaskComplete.run();
-                        status = AgentStatus.RETURNING_HOME;
-                    }
-
-                    Thread.sleep(1000);
-                }
-                // 복귀 완료
-                onReturnComplete.run();
-            } catch (InterruptedException e) {
-                log.error("이동 중 예외 발생", e);
-                Thread.currentThread().interrupt();
-            } finally {
-                isMoving = false;
-            }
-        }).start();
-    }
-
-    public void performTask(int taskDurationTime) {
-        if (status != AgentStatus.MOVING_TO_TARGET) {
-            log.warn("에이전트가 목표 위치로 이동하지 않았습니다 : {}", status);
-            return;
-        }
-        log.info("에이전트 {}가 현재 위치에서 작업을 수행합니다.", id);
-        status = AgentStatus.PERFORMING_TASK;
-        try {
-            Thread.sleep(taskDurationTime);
-            log.info("에이전트 {} 작업 완료", id);
-        } catch (InterruptedException e) {
-            log.error("작업 수행 중 예외 발생", e);
-            Thread.currentThread().interrupt();
-        }
+    public void rechargeBattery(int amount) {
+        this.batteryLevel = Math.min(60, this.batteryLevel + amount);
     }
 }

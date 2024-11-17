@@ -18,6 +18,9 @@ import com.ssafy.wattagatta.global.exception.ErrorCode;
 import com.ssafy.wattagatta.global.utils.GlobalClock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,6 +64,7 @@ public class AgentManager {
         agents.add(agent1);
         agents.add(agent2);
         this.webSocketSessionManager = webSocketSessionManager;
+        startBatteryRechargeScheduler();
     }
 
     public synchronized void assignTaskToAgent(Agent agent, TargetLoc targetLoc, Consumer<TargetLoc> failureCallback) {
@@ -83,19 +87,58 @@ public class AgentManager {
 
             List<Node> fullPath = assignFullPathToAgent(agent, pathToTarget, returnPath);
 
-            pathStore.savePath(agent.getId(), currentGlobalTime, fullPath);
-            log.info("에이전트 전체 설정 경로 : {}", agent.getCurrentPath());
+            int requiredBattery = fullPath.size();
 
-            int targetPathSize = pathToTarget.size();
-            sendAgentRoute(agent, fullPath, conveyPathSize, targetPathSize);
+            // 배터리가 충분한 경우
+            if(agent.getBatteryLevel() > requiredBattery){
+                log.info("배터리 충분 : 현재 agent 배터리 : {} , 필요 배터리 : {}", agent.getBatteryLevel(), requiredBattery);
+                pathStore.savePath(agent.getId(), currentGlobalTime, fullPath);
+                log.info("에이전트 전체 설정 경로 : {}", agent.getCurrentPath());
 
-            simulateAgentMovement(agent, fullPath, pathToTarget.size(), conveyPathSize);
+                int targetPathSize = pathToTarget.size();
+                sendAgentRoute(agent, fullPath, conveyPathSize, targetPathSize);
+
+                simulateAgentMovement(agent, fullPath, pathToTarget.size(), conveyPathSize);
+            }
+            // 배터리가 부족한 경우
+            else {
+                double rechargeTime = requiredBattery - agent.getBatteryLevel();
+                int scheduledTime = (int) (globalClock.getGlobalTime() + 3 + 1);
+
+                // 스케줄러를 사용하여 일정 시간 후에 다시 시도
+                log.info("배터리 부족 : 현재 agent 배터리 : {} , 필요 배터리 : {}", agent.getBatteryLevel(), requiredBattery);
+                scheduleTaskAssignment(agent, targetLoc, failureCallback, scheduledTime);
+            }
         } catch (CustomException e) {
             log.error("에이전트 {}가 경로를 찾지 못했습니다: {}", agent.getId(), e.getMessage());
             agent.setStatus(AgentStatus.IDLE);
             failureCallback.accept(targetLoc);
         }
     }
+
+    /**
+     * 배터리가 부족한 경우 충전 후 다시 실행 메서드
+     * @param agent
+     * @param targetLoc
+     * @param failureCallback
+     * @param scheduledTime
+     */
+    private void scheduleTaskAssignment(Agent agent, TargetLoc targetLoc, Consumer<TargetLoc> failureCallback, int scheduledTime) {
+        new Thread(() -> {
+            try {
+                agent.setStatus(AgentStatus.PERFORMING_CHARGE);
+                while (globalClock.getGlobalTime() < scheduledTime) {
+                    Thread.sleep(1000);
+                }
+                agent.setCurrentNode(agent.getHomeNode());
+                assignTaskToAgent(agent, targetLoc, failureCallback);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error("작업 할당 재시도 중 인터럽트 발생", e);
+            }
+        }).start();
+    }
+
 
     private void simulateAgentMovement(Agent agent, List<Node> fullPath, int pathToTargetSize, int conveyPathSize) {
         new Thread(() -> {
@@ -104,7 +147,7 @@ public class AgentManager {
                 for (int i = 0; i < fullPath.size(); i++) {
                     log.info("simulate i : {}, fullPath.size : {}", i, fullPath.size());
                     Node currentNode = fullPath.get(i);
-
+                    agent.consumeBattery(1);
                     Thread.sleep(1000);
 
                     int angle = 1;
@@ -198,18 +241,6 @@ public class AgentManager {
         return fullPath;
     }
 
-
-    private List<Node> calcAgentPath(Agent agent) {
-        List<Constraint> homePathConstraints = pathStore.getConstraintsForAgent(agent.getId());
-        List<Node> homePath = pathCalcService.calcPath(agent, homePathConstraints);
-        if (homePath == null) {
-            agent.setStatus(AgentStatus.IDLE);
-            throw new CustomException(ErrorCode.CANNOT_FIND_NEW_PATH);
-        }
-        agent.setCurrentPath(new ArrayList<>(homePath));
-        return homePath;
-    }
-
     public synchronized Agent findAvailableAgent() {
         return agents.stream()
                 .filter(Agent::isAvailable)
@@ -250,10 +281,10 @@ public class AgentManager {
             String jsonMessage = objectMapper.writeValueAsString(response);
 //            log.info("Unity 전송 데이터 : {}", jsonMessage);
             if (!webSocketSessionManager.sendMessageToPath(unityPath, jsonMessage)) {
-                log.error("메시지 전송 실패");
+//                log.error("메시지 전송 실패");
             }
         } catch (Exception e) {
-            log.error("에이전트 위치 전송 실패", e);
+//            log.error("에이전트 위치 전송 실패", e);
         }
     }
 
@@ -301,7 +332,7 @@ public class AgentManager {
             sendRouteSegment(carNumber, 3, routeToHome, abRouteToHome);
 
         } catch (Exception e) {
-            log.error("RCcar 메시지 전송 실패", e);
+//            log.error("RCcar 메시지 전송 실패", e);
         }
     }
 
@@ -311,10 +342,10 @@ public class AgentManager {
             String jsonMessage = objectMapper.writeValueAsString(response);
 
             if (!webSocketSessionManager.sendMessageToPath(agentPath, jsonMessage)) {
-                log.error("RCcar 메시지 전송 실패");
+//                log.error("RCcar 메시지 전송 실패");
             }
         } catch (Exception e) {
-            log.error("RCcar 메시지 전송 실패", e);
+//            log.error("RCcar 메시지 전송 실패", e);
         }
     }
 
@@ -358,6 +389,20 @@ public class AgentManager {
         } else {
             return 0;
         }
+    }
+
+    /**
+     * IDLE agent 배터리 충전 스케쥴러
+     */
+    private void startBatteryRechargeScheduler() {
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            for (Agent agent : agents) {
+                if (agent.getStatus() == AgentStatus.PERFORMING_CHARGE) {
+                    agent.rechargeBattery(20); // 1초마다 배터리 20씩 충전 3초 완충 상황 가정
+                }
+            }
+        }, 1, 1, TimeUnit.SECONDS);
     }
 
 
