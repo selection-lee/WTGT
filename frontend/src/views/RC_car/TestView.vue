@@ -10,11 +10,13 @@
                         <h3 class="text-lg font-semibold mb-2">Bot List</h3>
                         <ul>
                             <li v-for="bot in botList" :key="bot.id" class="text-white-500 mb-1">
-                                {{ bot.name }}: <span :class="bot.status === 'on' ? 'text-green-500' : 'text-red-500'">{{ bot.statusText }}</span>
+                                {{ bot.name }}: <span
+                                    :class="bot.status === 'on' ? 'text-green-500' : 'text-red-500'">{{ bot.statusText
+                                    }}</span>
                             </li>
                         </ul>
                     </div>
-                    
+
                     <!-- Bot State -->
                     <div class="bg-gray-950 p-4 rounded-lg">
                         <h3 class="text-lg font-semibold mb-2">Bot State</h3>
@@ -33,55 +35,40 @@
                         <!--맵-->
                         <div class="relative" style="width: 270px; height: 270px; left: 90px;">
                             <!-- 세로 선 -->
-                            <div v-for="i in 8" :key="'v'+i" 
-                                class="absolute bg-white"
-                                :style="{ 
-                                    left: (i * 30) + 'px', 
-                                    top: 0, 
-                                    width: '1px', 
-                                    height: '270px'
-                                }">
+                            <div v-for="i in 8" :key="'v' + i" class="absolute bg-white" :style="{
+                                left: (i * 30) + 'px',
+                                top: 0,
+                                width: '1px',
+                                height: '270px'
+                            }">
                             </div>
 
                             <!-- 가로 선 -->
-                            <div v-for="i in 8" :key="'h'+i" 
-                                class="absolute bg-white"
-                                :style="{ 
-                                    top: (i * 30) + 'px', 
-                                    left: 0, 
-                                    height: '1px', 
-                                    width: '270px'
-                                }">
+                            <div v-for="i in 8" :key="'h' + i" class="absolute bg-white" :style="{
+                                top: (i * 30) + 'px',
+                                left: 0,
+                                height: '1px',
+                                width: '270px'
+                            }">
                             </div>
+                            <!-- RC 카 위치 표시 -->
+                            <div v-for="bot in transformedBotList" :key="bot.id" :style="{
+                                top: bot.position.y + 'px',
+                                left: bot.position.x + 'px',
+                                transform: 'translate(-8px, -8px)'  // w-4는 16px이므로 절반인 8px만큼 이동
+                            }" class="absolute w-4 h-4 rounded-full" :class="bot.color">
+                                {{ bot.name }}
+                            </div>
+
                         </div>
 
-                        <!-- RC 카 위치 표시 -->
-                        <div
-                            v-for="bot in transformedBotList"
-                            :key="bot.id"
-                            :style="{ 
-                                top: bot.position.y + 'px', 
-                                left: (bot.position.x + 90) + 'px'
-                            }"
-                            class="absolute w-4 h-4 rounded-full"
-                            :class="bot.color"
-                        >
-                            {{ bot.name }}
-                        </div>
+
                         <!-- 컨베이어 벨트 아이콘 -->
                         <div class="absolute" style="top: 260px; left: 138px;">
-                            <svg 
-                                width="24" 
-                                height="32" 
-                                viewBox="0 0 24 32" 
-                                fill="none" 
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
+                            <svg width="24" height="32" viewBox="0 0 24 32" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
                                 <rect x="8" y="0" width="8" height="24" fill="#22c55e" />
-                                <path 
-                                    d="M12 24L4 32L20 32L12 24Z" 
-                                    fill="#22c55e"
-                                />
+                                <path d="M12 24L4 32L20 32L12 24Z" fill="#22c55e" />
                                 <rect x="4" y="4" width="16" height="2" fill="#1a8a3d" />
                                 <rect x="4" y="12" width="16" height="2" fill="#1a8a3d" />
                                 <rect x="4" y="20" width="16" height="2" fill="#1a8a3d" />
@@ -107,6 +94,36 @@ export default {
     },
     data() {
         return {
+            lastHouseArriveStates: {  // house_arrive의 이전 상태 저장
+                1: false,
+                2: false
+            },
+            lastPositions: {}, //마지막 위치 저장용
+            // isWaitingNewPosition: {
+            //     1: false,
+            //     2: false
+            // }, // 새로운 위치 저장용
+            initialPositions: {
+                1: {
+                    x: 0.0,
+                    y: -2.0,
+                    z: -1.0
+                },
+                2: {
+                    x: 1.0,
+                    y: -2.0,
+                    z: -1.0
+                }
+            }, // 초기 위치 저장
+            // 새로운 경로 시작을 위한 플래그들
+            resetComplete: {  // 초기화가 완전히 끝났는지 체크
+                1: false,
+                2: false
+            },
+            samePositionCount: {  // 같은 위치가 몇 번 들어왔는지 카운트
+                1: 0,
+                2: 0
+            },
             // RC카 데이터를 각각 저장
             rcCarData: {
                 1: {
@@ -114,7 +131,7 @@ export default {
                     rc_car: {
                         x: 0.0,
                         y: -2.0,
-                        z: 0.0
+                        z: -1.0
                     },
                     rc_car_angle: 1,
                     arrive: false,
@@ -124,9 +141,9 @@ export default {
                 2: {
                     rc_car_id: 2,
                     rc_car: {
-                        x: 0.0,
+                        x: 1.0,
                         y: -2.0,
-                        z: 0.0
+                        z: -1.0
                     },
                     rc_car_angle: 1,
                     arrive: false,
@@ -135,25 +152,54 @@ export default {
                 }
             },
             botList: [
-                { 
-                    id: 1, 
-                    name: 'Bot 1', 
-                    status: 'on', 
-                    statusText: 'On the move', 
-                    state: 'On the move', 
-                    battery: 65, 
-                    color: 'bg-yellow-500' 
+                {
+                    id: 1,
+                    name: 'Bot 1',
+                    status: 'on',
+                    statusText: 'On the move',
+                    state: 'On the move',
+                    battery: 65,
+                    color: 'bg-yellow-500'
                 },
-                { 
-                    id: 2, 
-                    name: 'Bot 2', 
-                    status: 'on', 
-                    statusText: 'On the move', 
-                    state: 'On the move', 
-                    battery: 45, 
-                    color: 'bg-red-500' 
+                {
+                    id: 2,
+                    name: 'Bot 2',
+                    status: 'on',
+                    statusText: 'On the move',
+                    state: 'On the move',
+                    battery: 45,
+                    color: 'bg-red-500'
                 }
-            ]
+            ],
+            webSocket: null,
+            // 상태 변화 추적을 위한 플래그들 추가
+            lastConveyArriveStates: {
+                1: false,
+                2: false
+            },
+            lastArriveStates: {
+                1: false,
+                2: false
+            },
+            stateChangeCount: {  // 상태 변화 후 같은 위치 카운트
+                1: 0,
+                2: 0
+            },
+            // 로딩/언로딩 상태가 끝났는지 체크
+            loadingComplete: {
+                1: false,
+                2: false
+            },
+            unloadingComplete: {
+                1: false,
+                2: false
+            }
+        }
+    },
+    beforeDestroy() {
+        if (this.webSocket) {
+            this.webSocket.close();
+            console.log('WebSocket manually disconnected');
         }
     },
     computed: {
@@ -164,30 +210,122 @@ export default {
                 return {
                     ...bot,
                     position: {
-                        x: carData.rc_car.x * 30,
-                        y: (7 - carData.rc_car.y) * 30 // 8x8 그리드에 맞춰 7로 수정
+                        x: carData.rc_car.z * 30 + 30, // 30 더해서 우측으로 한 칸 이동
+                        y: (8 - carData.rc_car.x) * 30 // 8x8 그리드에 맞춰 7로 수정
                     }
                 };
             });
         }
     },
     mounted() {
-        this.connectWebSocket();
+        if (!this.webSocket) {
+            this.connectWebSocket();
+        }
     },
     methods: {
         connectWebSocket() {
-            const ws = new WebSocket('ws://k11c208.p.ssafy.io:8081/ws/rccar');
-            
+            this.webSocket = new WebSocket('ws://k11c208.p.ssafy.io:8081/ws/rccar');
+
             // 연결 성공 시
-            ws.onopen = () => {
+            this.webSocket.onopen = () => {
                 console.log('WebSocket Connected!');
             };
 
-            ws.onmessage = (event) => {
+            this.webSocket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                // RC카 ID에 따라 해당하는 데이터 업데이트
-                console.log('rccar data 웹소켓: ',data)
-                this.rcCarData[data.rc_car_id] = data;
+                const id = data.rc_car_id;
+                console.log('rccar:', id, '\ndata (x,y): ', data.rc_car.x, ',', data.rc_car.z, '\nHA:', data.house_arrive, '\nCA:', data.convey_arrive, '\nA:', data.arrive)
+
+                // Bot 상태 업데이트
+                const botIndex = this.botList.findIndex(bot => bot.id === id);
+                if (botIndex === -1) return;
+
+                // house_arrive가 true에서 false로 변경될 때
+                if (this.lastHouseArriveStates[id] && !data.house_arrive) {
+                    this.samePositionCount[id] = 1;
+                    this.stateChangeCount[id] = 1;
+                    this.rcCarData[id] = {
+                        ...data,
+                        rc_car: this.initialPositions[id]
+                    };
+                    this.botList[botIndex].state = 'Charging';
+                }
+                // convey_arrive true로 변경될 때
+                else if (!this.lastConveyArriveStates[id] && data.convey_arrive) {
+                    this.stateChangeCount[id] = 0;
+                    this.loadingComplete[id] = false;
+                }
+                // convey_arrive true에서 false로 변경될 때
+                else if (this.lastConveyArriveStates[id] && !data.convey_arrive) {
+                    this.stateChangeCount[id] = 1;
+                    this.botList[botIndex].state = 'Loading Items';
+                }
+                // arrive true로 변경될 때
+                else if (!this.lastArriveStates[id] && data.arrive) {
+                    this.stateChangeCount[id] = 0;
+                    this.unloadingComplete[id] = false;
+                }
+                // arrive true에서 false로 변경될 때
+                else if (this.lastArriveStates[id] && !data.arrive) {
+                    this.stateChangeCount[id] = 1;
+                    this.botList[botIndex].state = 'Unloading';
+                }
+                // 상태 변화 후 같은 위치가 계속 들어올 때
+                else if (this.lastPositions[id] && 
+                        data.rc_car.x === this.lastPositions[id].x && 
+                        data.rc_car.z === this.lastPositions[id].z) {
+                    // Charging 상태에서의 카운트
+                    if (this.samePositionCount[id] > 0) {
+                        this.samePositionCount[id]++;
+                        if (this.samePositionCount[id] >= 5) {
+                            this.resetComplete[id] = true;
+                        }
+                    }
+                    // Loading/Unloading 상태에서의 카운트
+                    if (this.stateChangeCount[id] > 0) {
+                        this.stateChangeCount[id]++;
+                        if (this.stateChangeCount[id] >= 5) {
+                            if (this.botList[botIndex].state === 'Loading Items') {
+                                this.loadingComplete[id] = true;
+                                this.botList[botIndex].state = 'On the move';
+                            } else if (this.botList[botIndex].state === 'Unloading') {
+                                this.unloadingComplete[id] = true;
+                                this.botList[botIndex].state = 'On the move';
+                            }
+                            this.stateChangeCount[id] = 0;
+                        }
+                    }
+                }
+                // 새로운 좌표가 들어올 때
+                else if (!this.lastPositions[id] || 
+                        data.rc_car.x !== this.lastPositions[id].x || 
+                        data.rc_car.z !== this.lastPositions[id].z) {
+                    // Charging에서 새로운 경로 시작
+                    if (this.resetComplete[id]) {
+                        this.resetComplete[id] = false;
+                        this.samePositionCount[id] = 0;
+                        this.botList[botIndex].state = 'On the move';
+                    }
+                    // Loading/Unloading 완료 후 새로운 좌표
+                    else if (!data.convey_arrive && !data.arrive && 
+                           (this.loadingComplete[id] || this.unloadingComplete[id])) {
+                        this.botList[botIndex].state = 'On the move';
+                    }
+                    this.rcCarData[id] = data;
+                }
+
+                // 현재 위치와 상태 저장
+                this.lastPositions[id] = {...data.rc_car};
+                this.lastHouseArriveStates[id] = data.house_arrive;
+                this.lastConveyArriveStates[id] = data.convey_arrive;
+                this.lastArriveStates[id] = data.arrive;
+
+
+                // botList의 해당 봇 배터리 상태 업데이트
+                // const botIndex = this.botList.findIndex(bot => bot.id === data.rc_car_id);
+                if (data.battery_status !== undefined) {
+                    this.botList[botIndex].battery = data.battery_status;
+                }
                 // if (data.convey_arrive==true or ...) {
                 //     count ++
                 //     if count === 5 {
@@ -196,12 +334,12 @@ export default {
                 //     }
                 // }
             };
-            
-            ws.onerror = (error) => {
+
+            this.webSocket.onerror = (error) => {
                 console.error('WebSocket error:', error);
             };
-            
-            ws.onclose = () => {
+
+            this.webSocket.onclose = () => {
                 console.log('WebSocket connection closed');
                 setTimeout(() => this.connectWebSocket(), 5000);
             };
