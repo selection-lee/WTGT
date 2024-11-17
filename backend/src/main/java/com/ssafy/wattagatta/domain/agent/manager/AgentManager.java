@@ -12,12 +12,16 @@ import com.ssafy.wattagatta.domain.agent.model.Direction;
 import com.ssafy.wattagatta.domain.agent.model.Node;
 import com.ssafy.wattagatta.domain.agent.service.PathCalcService;
 import com.ssafy.wattagatta.domain.agent.utils.PathStore;
+import com.ssafy.wattagatta.domain.product.dto.ProductLoc;
 import com.ssafy.wattagatta.domain.product.dto.TargetLoc;
+import com.ssafy.wattagatta.domain.product.entity.ProductEntity;
+import com.ssafy.wattagatta.domain.product.repository.ProductRepository;
 import com.ssafy.wattagatta.global.exception.CustomException;
 import com.ssafy.wattagatta.global.exception.ErrorCode;
 import com.ssafy.wattagatta.global.utils.GlobalClock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +40,7 @@ public class AgentManager {
     private final PathCalcService pathCalcService;
     private final ObjectMapper objectMapper;
     private final WebSocketSessionManager webSocketSessionManager;
+    private final ProductRepository productRepository;
 
     private Agent agent1 = new Agent();
     private Agent agent2 = new Agent();
@@ -53,7 +58,7 @@ public class AgentManager {
     private String agentPath;
 
     public AgentManager(PathCalcService pathCalcService, GlobalClock globalClock,
-                        WebSocketSessionManager webSocketSessionManager) {
+                        WebSocketSessionManager webSocketSessionManager, ProductRepository productRepository) {
         this.globalClock = globalClock;
         this.pathCalcService = pathCalcService;
         this.agents = new ArrayList<>();
@@ -64,11 +69,13 @@ public class AgentManager {
         agents.add(agent1);
         agents.add(agent2);
         this.webSocketSessionManager = webSocketSessionManager;
+        this.productRepository = productRepository;
         startBatteryRechargeScheduler();
     }
 
-    public synchronized void assignTaskToAgent(Agent agent, TargetLoc targetLoc, Consumer<TargetLoc> failureCallback) {
+    public synchronized void assignTaskToAgent(Agent agent, ProductLoc productLoc, Consumer<ProductLoc> failureCallback) {
         try {
+            TargetLoc targetLoc = productLoc.targetLoc();
             int currentGlobalTime = globalClock.getGlobalTime();
             agent.assignTask(targetLoc, currentGlobalTime);
 
@@ -102,6 +109,7 @@ public class AgentManager {
                 sendAgentRoute(agent, fullPath, conveyPathSize, targetPathSize);
 
                 simulateAgentMovement(agent, fullPath, pathToTarget.size(), conveyPathSize);
+                scheduleLoadingCompletion(productLoc, fullPath.size());
             }
             // 배터리가 부족한 경우
             else {
@@ -110,23 +118,23 @@ public class AgentManager {
 
                 // 스케줄러를 사용하여 일정 시간 후에 다시 시도
                 log.info("배터리 부족 : 현재 agent 배터리 : {} , 필요 배터리 : {}", agent.getBatteryLevel(), requiredBattery);
-                scheduleTaskAssignment(agent, targetLoc, failureCallback, scheduledTime);
+                scheduleTaskAssignment(agent, productLoc, failureCallback, scheduledTime);
             }
         } catch (CustomException e) {
             log.error("에이전트 {}가 경로를 찾지 못했습니다: {}", agent.getId(), e.getMessage());
             agent.setStatus(AgentStatus.IDLE);
-            failureCallback.accept(targetLoc);
+            failureCallback.accept(productLoc);
         }
     }
 
     /**
      * 배터리가 부족한 경우 충전 후 다시 실행 메서드
      * @param agent
-     * @param targetLoc
+     * @param productLoc
      * @param failureCallback
      * @param scheduledTime
      */
-    private void scheduleTaskAssignment(Agent agent, TargetLoc targetLoc, Consumer<TargetLoc> failureCallback, int scheduledTime) {
+    private void scheduleTaskAssignment(Agent agent, ProductLoc productLoc, Consumer<ProductLoc> failureCallback, int scheduledTime) {
         new Thread(() -> {
             try {
                 agent.setStatus(AgentStatus.PERFORMING_CHARGE);
@@ -134,7 +142,7 @@ public class AgentManager {
                     Thread.sleep(1000);
                 }
                 agent.setCurrentNode(agent.getHomeNode());
-                assignTaskToAgent(agent, targetLoc, failureCallback);
+                assignTaskToAgent(agent, productLoc, failureCallback);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 log.error("작업 할당 재시도 중 인터럽트 발생", e);
@@ -477,6 +485,25 @@ public class AgentManager {
         }
         return abRoute;
     }
+
+    private void scheduleLoadingCompletion(ProductLoc productLoc, int travelTime) {
+        new Thread(() -> {
+            try {
+                Thread.sleep(travelTime * 1000L);
+                ProductEntity product = productRepository.findById(productLoc.productId())
+                        .orElseThrow(() -> new CustomException(ErrorCode.CANNOT_FIND_PRODUCT_ENTITY));
+                product.changeLoaded();
+                productRepository.save(product);
+                log.info("Product {} 적재 완료.", productLoc.productId());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error("적재 처리 중 인터럽트 발생", e);
+            } catch (CustomException e) {
+                log.error("적재 완료 처리 실패: {}", e.getMessage());
+            }
+        }).start();
+    }
+
 
     private int directionToInt(Direction direction) {
         return switch (direction) {
