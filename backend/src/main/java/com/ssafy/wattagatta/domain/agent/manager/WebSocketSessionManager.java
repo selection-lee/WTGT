@@ -34,7 +34,7 @@ public class WebSocketSessionManager {
     public boolean sendMessageToPath(String path, String message) {
         Set<WebSocketSession> sessions = sessionMap.get(path);
         if (sessions == null || sessions.isEmpty()) {
-            log.warn("No active WebSocket sessions for path: {}", path);
+//            log.warn("No active WebSocket sessions for path: {}", path);
             return false;
         }
 
