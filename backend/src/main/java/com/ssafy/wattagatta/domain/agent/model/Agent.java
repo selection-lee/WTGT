@@ -46,6 +46,7 @@ public class Agent {
         this.goalNode = new Node(targetLoc.x(), targetLoc.y(), Direction.NORTH);
         this.status = AgentStatus.MOVING_TO_TARGET;
         this.startTime = currentGlobalTime;
+        this.currentDirection = Direction.EAST;
     }
 
     public void assignReturnHomeTask(int currentGlobalTime) {
