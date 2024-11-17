@@ -85,6 +85,9 @@ public class AgentManager {
             log.info("에이전트 {}의 경로: {}", agent.getId(), pathToTarget);
             log.info("에이전트 {}의 복귀 경로 : {}", agent.getId(), returnPath);
 
+            List<Constraint> constraints1 = pathStore.getConstraintsForAgent(agent.getId());
+            log.info("에이전트 {}의 constraints : {}", agent.getId(), constraints1);
+
             List<Node> fullPath = assignFullPathToAgent(agent, pathToTarget, returnPath);
 
             int requiredBattery = fullPath.size();
@@ -275,7 +278,8 @@ public class AgentManager {
                     angle,
                     arrived,
                     conveyArrived,
-                    houseArrived
+                    houseArrived,
+                    (int) agent.getBatteryLevel()
             );
 
             String jsonMessage = objectMapper.writeValueAsString(response);

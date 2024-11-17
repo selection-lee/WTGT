@@ -109,7 +109,8 @@ public class AgentWebSocketHandler extends TextWebSocketHandler {
                 1,
                 false,
                 false,
-                false
+                false,
+                60
         );
         String message = objectMapper.writeValueAsString(carData);
         session.sendMessage(new TextMessage(message));
