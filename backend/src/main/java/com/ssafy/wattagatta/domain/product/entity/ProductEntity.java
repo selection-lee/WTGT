@@ -14,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AccessLevel;
@@ -61,8 +62,8 @@ public class ProductEntity extends BaseEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity categoryEntity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id", nullable = false, unique = true)
     private InvoiceEntity invoiceEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -102,5 +103,21 @@ public class ProductEntity extends BaseEntity {
         product.areaEntity = area;
         product.productStatus = ProductStatus.PENDING_ARRIVAL;
         return product;
+    }
+
+    public void moveToPendingTransport() {
+        this.productStatus = ProductStatus.PENDING_TRANSPORT;
+    }
+
+    public boolean canMoveToPendingTransport() {
+        return productStatus == ProductStatus.PENDING_ARRIVAL;
+    }
+
+    public void changeTransit(){
+        this.productStatus = ProductStatus.IN_TRANSIT;
+    }
+
+    public void changeLoaded(){
+        this.productStatus = ProductStatus.LOADED;
     }
 }
