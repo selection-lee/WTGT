@@ -1,8 +1,8 @@
 INSERT INTO recipient (name, email, phone, address) VALUES
-('Alice Johnson', 'alice.johnson@example.com', '010-1234-5678', '123 Maple Street, Seoul'),
-('Bob Smith', 'bob.smith@example.com', '010-2345-6789', '456 Oak Avenue, Busan'),
-('Charlie Brown', 'charlie.brown@example.com', '010-3456-7890', '789 Pine Lane, Incheon'),
-('David Lee', 'david.lee@example.com', '010-4567-8901', '101 Cherry Blvd, Gwangju'),
+('삼성전자 광주사업장', 'samsung@ssafy.com', '010-1234-5678', '하남동, 광주'),
+('삼성전자 구미사업장', 'samsung@ssafy.com', '010-2345-6789', '구미동, 구미'),
+('삼성전자 DX', 'samsungDX@ssafy.com', '010-3456-7890', '영통대로, 수원'),
+('삼성전자 DS', 'samsungDS@ssafy.com', '010-4567-8901', '화성중앙로, 화성'),
 ('Eve Kim', 'eve.kim@example.com', '010-5678-9012', '202 Walnut Drive, Daegu'),
 ('Frank Wilson', 'frank.wilson@example.com', '010-6789-0123', '303 Cedar Court, Daejeon'),
 ('Grace Park', 'grace.park@example.com', '010-7890-1234', '404 Birch Circle, Ulsan'),
