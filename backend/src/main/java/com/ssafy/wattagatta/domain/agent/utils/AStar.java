@@ -141,11 +141,6 @@ public class AStar {
             return null;
         }
 
-//        if (!isValidEdge(currentState.node, nextNode)) {
-//            log.info("InValidEdge ");
-//            return null;
-//        }
-
         double h = heuristic(nextNode, goalNode);
         return State.getNextState(currentState, nextTimeStep, gCost, h, nextNode);
     }
@@ -156,6 +151,32 @@ public class AStar {
         return x >= 0 && x <= gridWidth && y >= 0 && y <= gridHeight;
     }
 
+    public boolean isConstrained(String agentId, Node fromNode, Node toNode, int timeStep,
+                                 List<Constraint> constraints) {
+        for (Constraint constraint : constraints) {
+            if (constraint.getAgentId().equals(agentId)) {
+                continue;
+            }
+
+            if (constraint.getTimeStep() != timeStep) {
+                continue;
+            }
+
+            if (constraint.getType() == ConstraintType.VERTEX) {
+                if (constraint.getNode().equalsPosition(toNode)) {
+                    return true;
+                }
+            } else if (constraint.getType() == ConstraintType.EDGE) {
+                if (constraint.getFromNode().equalsPosition(fromNode) && constraint.getToNode()
+                        .equalsPosition(toNode)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Deprecated
     public boolean isValidEdge(Node fromNode, Node toNode) {
         int gridWidth = 9;
         int gridHeight = 9;
@@ -182,31 +203,6 @@ public class AStar {
         }
 
         return true;
-    }
-
-    public boolean isConstrained(String agentId, Node fromNode, Node toNode, int timeStep,
-                                 List<Constraint> constraints) {
-        for (Constraint constraint : constraints) {
-            if (constraint.getAgentId().equals(agentId)) {
-                continue;
-            }
-
-            if (constraint.getTimeStep() != timeStep) {
-                continue;
-            }
-
-            if (constraint.getType() == ConstraintType.VERTEX) {
-                if (constraint.getNode().equalsPosition(toNode)) {
-                    return true;
-                }
-            } else if (constraint.getType() == ConstraintType.EDGE) {
-                if (constraint.getFromNode().equalsPosition(fromNode) && constraint.getToNode()
-                        .equalsPosition(toNode)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
 }
