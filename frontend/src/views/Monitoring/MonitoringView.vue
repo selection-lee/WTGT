@@ -5,9 +5,28 @@
             <!-- 헤더 -->
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold">Stock Monitoring</h2>
-                <span class="text-sm text-gray-400">
-                    마지막 업데이트: {{ stockStore.formattedLastUpdate }}
-                </span>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <!-- 날짜 선택 필터 -->
+                        <input type="date" :value="stockStore.selectedDate" @change="handleDateChange"
+                            class="bg-gray-700 text-white px-3 py-1 rounded" />
+                        <!-- 전체 기간 조회 버튼 -->
+                        <button @click="handleShowAll"
+                            class="px-3 py-1 text-sm bg-gray-700 text-white rounded hover:bg-gray-600"
+                            :class="{ 'bg-blue-500': !stockStore.selectedDate }">
+                            전체 기간
+                        </button>
+                    </div>
+                    <!-- 마지막 업데이트 시간 표시 -->
+                    <span class="text-sm text-gray-400">
+                        마지막 업데이트: {{ stockStore.formattedLastUpdate }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- 현재 조회 중인 데이터 범위 표시 -->
+            <div class="text-sm text-gray-400 mb-4">
+                {{ stockStore.selectedDate ? `${stockStore.selectedDate} 입고 예정 물품` : '전체 기간 물품' }}
             </div>
 
             <!-- 입고 상품 테이블 섹션 -->
@@ -283,7 +302,20 @@ const currentPage = ref(1)             // 현재 페이지
 const itemsPerPage = 10                // 페이지당 항목 수
 const isAutoUpdateEnabled = ref(false) // 자동 업데이트 상태
 
-// 상태 필터 토글
+// 날짜 선택 핸들러
+const handleDateChange = (event) => {
+    const date = event.target.value
+    if (date) {
+        stockStore.fetchProductsByDate(date)
+    }
+}
+
+// 전체 기간 조회 핸들러
+const handleShowAll = () => {
+    stockStore.clearDateSelection()
+}
+
+// 필터 관련 함수들
 const toggleFilter = (status) => {
     const index = selectedFilters.value.indexOf(status)
     if (index === -1) {
@@ -376,9 +408,9 @@ watch([selectedFilters, selectedCategories], () => {
     currentPage.value = 1
 })
 
-// 컴포넌트 마운트 시 초기 데이터 로드
+// 컴포넌트 마운트 시 전체 데이터로 시작
 onMounted(() => {
-    stockStore.fetchProducts()
+    stockStore.fetchAllProducts()
 })
 
 // 컴포넌트 언마운트 시 자동 업데이트 정리
