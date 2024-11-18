@@ -68,8 +68,9 @@
                                 top: bot.position.y + 'px',
                                 left: bot.position.x + 'px',
                                 transform: 'translate(-8px, -8px)'  // w-4는 16px이므로 절반인 8px만큼 이동
-                            }" class="absolute w-4 h-4 rounded-full" :class="bot.color">
-                                {{ bot.name }}
+                            }" class="absolute w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold" :class="[bot.color, 'leading-none']">
+                                <!-- {{ bot.id }} -->
+                                <span class="translate-x-[-0.5px]">{{ bot.id }}</span>
                             </div>
 
                         </div>
@@ -241,15 +242,42 @@ export default {
             // 연결 성공 시
             this.webSocket.onopen = () => {
                 console.log('WebSocket Connected!');
+                // 웹소켓 연결 직후 각 RC카의 초기 위치를 설정
+                Object.keys(this.rcCarData).forEach(id => {
+                    this.rcCarData[id] = {
+                        ...this.rcCarData[id],
+                        rc_car: this.initialPositions[id]  // 초기 위치는 충전소로 설정
+                    };
+
+                    // botList에서 해당 bot의 상태를 'Charging'으로 변경
+                    const botIndex = this.botList.findIndex(bot => bot.id === parseInt(id));
+                    if (botIndex !== -1) {
+                        this.botList[botIndex].state = 'Charging';
+                    }
+                });
             };
 
             this.webSocket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 const id = data.rc_car_id;
                 console.log('rccar:', id, '\ndata (x,y): ', data.rc_car.x, ',', data.rc_car.z, '\nHA:', data.house_arrive, '\nCA:', data.convey_arrive, '\nA:', data.arrive)
+                
+                const botIndex = this.botList.findIndex(bot => bot.id === id);
+                
+                // 최초 연결 시 받은 데이터일 경우 initialPositions 값을 사용
+                if (!this.lastPositions[id]) {
+                    this.rcCarData[id] = {
+                        ...data,
+                        rc_car: this.initialPositions[id]  // 초기 위치(충전소)로 덮어씌우기
+                    };
+                    if (botIndex !== -1) {
+                        this.botList[botIndex].state = 'Charging';
+                    }
+                    this.lastPositions[id] = {...this.initialPositions[id]};
+                    return;
+                }
 
                 // Bot 상태 업데이트
-                const botIndex = this.botList.findIndex(bot => bot.id === id);
                 if (botIndex === -1) return;
 
                 // Bot 상태 업데이트 함수 수정
