@@ -55,15 +55,6 @@ public class AgentWebSocketHandler extends TextWebSocketHandler {
          */
         if (session.getUri() != null && session.getUri().getPath().equals(agentPath)) {
             webSocketSessionManager.addSession(agentPath, session);
-            sendRouteData(session, 1, List.of(1, 1, 1, 1, 1, 3, 1, 1, 2, 1, 1));
-            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-            scheduler.schedule(() -> {
-                try {
-                    sendRouteData(session, 2, List.of(1, 1, 1, 1, 1, 2, 1, 1, 3, 1, 1));
-                } catch (IOException e) {
-                    log.error("Failed to send delayed route data", e);
-                }
-            }, 1, TimeUnit.SECONDS);
         }
 
         ScheduledExecutorService pingScheduler = Executors.newSingleThreadScheduledExecutor();
