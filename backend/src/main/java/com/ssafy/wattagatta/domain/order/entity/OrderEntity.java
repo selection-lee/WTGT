@@ -59,12 +59,13 @@ public class OrderEntity extends BaseEntity {
         this.invoiceEntity = invoiceEntity;
     }
 
-    public static OrderEntity from(AddOrderRequest request, MemberEntity memberEntity) {
+    public static OrderEntity from(AddOrderRequest request, MemberEntity memberEntity, InvoiceEntity invoiceEntity) {
         return OrderEntity.builder()
                 .invoiceNumber(request.invoiceNumber())
                 .productName(request.productName())
                 .productQuantity(request.productQuantity())
                 .memberEntity(memberEntity)
+                .invoiceEntity(invoiceEntity)
                 .isStore(false)
                 .build();
     }
