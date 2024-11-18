@@ -80,11 +80,6 @@ const menuItems = ref([
     path: "/order",
   },
   {
-    name: "Statistics",
-    icon: "ChartBarSquareIcon",
-    path: "/statistics",
-  },
-  {
     name: "User",
     icon: "UserIcon",
     path: "/user",

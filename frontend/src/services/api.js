@@ -94,4 +94,18 @@ export const dashboardApi = {
   }
 }
 
+// 발주 기록
+export const orderApi = {
+  // 주문 생성
+  createOrder: async (orderData) => {
+    try {
+      const response = await api.post('/orders', orderData)
+      return response.data
+    } catch (err) {
+      console.error('주문 생성 에러:', err)
+      throw err
+    }
+  }
+}
+
 export default api
