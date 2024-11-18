@@ -10,8 +10,7 @@ import SignUpView from '@/views/Auth/SignUpView.vue'
 import OrderView from '@/views/Order/OrderView.vue' 
 import UserView from '@/views/User/UserView.vue' 
 import MonitoringView from '@/views/Monitoring/MonitoringView.vue' 
-
-import IncomeSection from '@/views/Dashboard/IncomeSection.vue'
+import SimulatorView from '@/views/simulator/SimulatorView.vue'
 
 const routes = [
   {
@@ -20,8 +19,8 @@ const routes = [
     children: [
       {
         path: '',
-        name: 'dashboard',
-        component: DashboardView,
+        name: 'simulator',
+        component: SimulatorView,
       },
       {
         path: 'rc_car',
@@ -37,11 +36,6 @@ const routes = [
         path: 'order',
         name: 'order',
         component: OrderView
-      },
-      {
-        path: 'statistics',
-        name: 'statistics',
-        component: IncomeSection
       },
       {
         path: 'user',

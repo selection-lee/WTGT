@@ -152,7 +152,6 @@
                                     <th>수량</th>
                                     <th>상태</th>
                                     <th>적재 위치</th>
-                                    <th>Bot</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -171,7 +170,6 @@
                                         </span>
                                     </td>
                                     <td>{{ formatLocation(product.areaName, product.productLocation) }}</td>
-                                    <td>{{ product.bot || '-' }}</td>
                                 </tr>
                             </tbody>
                         </table>
