@@ -49,24 +49,8 @@ const routes = [
         name: 'user',
         component: UserView
       },
-      {
-        path: 'test',
-        name: 'test',
-        component: TestView
-      },
-    //   {
-    //     path: 'settings',
-    //     name: 'settings',
-    //     component: () => import('@/views/Settings.vue'),  // 아직 만들지 않은 컴포넌트
-    //   }
     ]
   },
-//   // 에러 페이지
-//   {
-//     path: '/:pathMatch(.*)*',
-//     name: 'not-found',
-//     component: () => import('@/views/NotFound.vue')  // 404 페이지
-//   }
   {
     // 로그인 페이지
     path: '/login',
