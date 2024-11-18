@@ -22,8 +22,10 @@ import com.ssafy.wattagatta.global.exception.CustomException;
 import com.ssafy.wattagatta.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class OrderService {
 
@@ -40,11 +42,7 @@ public class OrderService {
         MemberEntity member = memberRepository.findById(1)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        orderRepository.save(OrderEntity.from(request, member));
-
-
         CategoryEntity category = categoryRepository.findByCategoryName(request.categoryName());
-
         AreaEntity area = areaRepository.findByAreaName(AreaName.GWANGJU);
 
         SenderEntity sender = SenderEntity.defaultCreate();
@@ -53,8 +51,11 @@ public class OrderService {
         RecipientEntity recipient = RecipientEntity.defaultCreate();
         recipientRepository.save(recipient);
 
-        InvoiceEntity invoice = InvoiceEntity.createInvoice(request.invoiceNumber(), sender, recipient, request.totalPrice());
+        InvoiceEntity invoice = InvoiceEntity.createInvoice(request.invoiceNumber(), sender, recipient,
+                request.totalPrice());
         invoiceRepository.save(invoice);
+
+        orderRepository.save(OrderEntity.from(request, member, invoice));
 
         ProductEntity product = ProductEntity.from(request, category, invoice, area);
         productRepository.save(product);
