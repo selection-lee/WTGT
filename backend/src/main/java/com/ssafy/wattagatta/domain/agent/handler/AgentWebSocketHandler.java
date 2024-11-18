@@ -47,7 +47,7 @@ public class AgentWebSocketHandler extends TextWebSocketHandler {
         if (session.getUri() != null && session.getUri().getPath().equals(unityPath)) {
             webSocketSessionManager.addSession(unityPath, session);
             sendInitialAgentData(session, 1, new AgentPositionResponse(0, -2, 0));
-            sendInitialAgentData(session, 2, new AgentPositionResponse(0, -2, 1));
+            sendInitialAgentData(session, 2, new AgentPositionResponse(1, -2, 0));
         }
 
         /*
