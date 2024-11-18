@@ -43,6 +43,11 @@ export const areaPrefix = {
 // 위치 포맷팅 함수: 지역 코드와 위치 번호를 조합
 export const formatLocation = (areaName, location) => {
   const prefix = areaPrefix[areaName] || "X" // 매핑되지 않은 지역은 'X' 사용
+  // location이 null인 경우 빈 문자열 반환
+  if (location === null) {
+    return prefix
+  }
+  // productLocation이 있으면 prefix와 location 조합해서 반환
   return `${prefix}${location}`
 }
 
