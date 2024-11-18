@@ -86,8 +86,18 @@ public class AgentManager {
             List<Node> pathToTarget = conveyPath.getPath();
             int conveyPathSize = conveyPath.getConveyPathSize();
 
+            // 컨베이어 벨트까지 경로(대기 제외)
+            List<Node> conveyToPath = conveyPath.getPath().subList(0, conveyPathSize - TASK_DURATION_TIME);
+
+            // 컨베이어 벨트부터 타겟까지 경로(대기 제외)
+            List<Node> conveyToTargetPath = conveyPath.getPath()
+                    .subList(conveyPathSize - 1, pathToTarget.size() - TASK_DURATION_TIME);
+
             // 복귀 경로 계산
             List<Node> returnPath = calcAgentReturnPath(agent, constraints);
+
+            // 타겟부터 집까지 경로 (대기 제외)
+            List<Node> targetToHomePath = returnPath.subList(0, returnPath.size() - TASK_DURATION_TIME);
 
             log.info("에이전트 {}의 경로: {}", agent.getId(), pathToTarget);
             log.info("에이전트 {}의 복귀 경로 : {}", agent.getId(), returnPath);
@@ -100,12 +110,11 @@ public class AgentManager {
             if (agent.getBatteryLevel() > requiredBattery) {
                 log.info("배터리 충분 : 현재 agent 배터리 : {} , 필요 배터리 : {}", agent.getBatteryLevel(), requiredBattery);
                 pathStore.savePath(agent.getId(), currentGlobalTime, fullPath);
-                log.info("에이전트 전체 설정 경로 : {}", agent.getCurrentPath());
 
-                int targetPathSize = pathToTarget.size();
-                sendAgentRoute(agent, fullPath, conveyPathSize, targetPathSize);
+                sendAgentRoute(agent, conveyToPath, conveyToTargetPath, targetToHomePath);
 
                 simulateAgentMovement(agent, fullPath, pathToTarget.size(), conveyPathSize);
+
                 scheduleLoadingCompletion(productLoc, fullPath.size());
             }
             // 배터리가 부족한 경우
@@ -303,46 +312,23 @@ public class AgentManager {
      * RC Car 메시지 전송 위한 메서드
      *
      * @param agent
-     * @param fullPath
-     * @param conveyPathSize
-     * @param targetPathSize
+     * @param conveyPath
+     * @param targetPath
+     * @param homePath
      */
-    private void sendAgentRoute(Agent agent, List<Node> fullPath, int conveyPathSize, int targetPathSize) {
+    private void sendAgentRoute(Agent agent, List<Node> conveyPath, List<Node> targetPath, List<Node> homePath) {
         try {
             int carNumber = Integer.parseInt(agent.getId().replace("agent", ""));
-//            List<Integer> routeActions = generateRouteActions(fullPath);
-            int conveyWaitTime = TASK_DURATION_TIME;
-            int targetWaitTime = TASK_DURATION_TIME;
-            int homeWaitTime = TASK_DURATION_TIME;
-
-            int conveyPathEndIndex = conveyPathSize - conveyWaitTime;
-            int targetPathStartIndex = conveyPathEndIndex + TASK_DURATION_TIME;
-            int targetPathEndIndex = targetPathSize - targetWaitTime;
-            int returnHomeStartIndex = targetPathEndIndex + TASK_DURATION_TIME;
-            int routeActionsSize = fullPath.size() - homeWaitTime;
-
-            List<Node> routeToConveyNode = fullPath.subList(0, conveyPathEndIndex);
-            List<Node> routeToTargetNode = fullPath.subList(targetPathStartIndex, targetPathEndIndex);
-            List<Node> routeToHomeNode = fullPath.subList(returnHomeStartIndex, routeActionsSize);
-            log.info("routeToConveyNode : {}", routeToConveyNode);
-            log.info("routeToTargetNode : {}", routeToTargetNode);
-            log.info("routeToHomeNode : {}", routeToHomeNode);
-
-            List<Integer> routeToConvey = generateRouteActions(routeToConveyNode, Direction.EAST);
-            List<Integer> routeToTarget = generateRouteActions(routeToTargetNode, Direction.NORTH);
-            List<Integer> routeToHome = generateRouteActions(routeToHomeNode, Direction.SOUTH);
-
-//            List<Integer> routeToConvey = routeActions.subList(0, conveyPathEndIndex);
-//            List<Integer> routeToTarget = routeActions.subList(targetPathStartIndex, targetPathEndIndex);
-//            List<Integer> routeToHome = routeActions.subList(returnHomeStartIndex, routeActionsSize);
+            log.info("컨베이어 벨트까지 : {}", conveyPath);
+            log.info("적재위치까지 : {}", targetPath);
+            log.info("집까지 : {}", homePath);
+            List<Integer> routeToConvey = generateRouteActions(conveyPath, Direction.EAST);
+            List<Integer> routeToTarget = generateRouteActions(targetPath, Direction.NORTH);
+            List<Integer> routeToHome = generateRouteActions(homePath, Direction.SOUTH);
 
             Direction startingDirectionToConvey = agent.getCurrentDirection();
             Direction startingDirectionToTarget = Direction.NORTH;
             Direction startingDirectionToHome = Direction.SOUTH;
-
-//            routeToConvey = adjustRoute(routeToConvey, fullPath, startingDirectionToConvey, 0);
-//            routeToTarget = adjustRoute(routeToTarget, fullPath, startingDirectionToTarget, targetPathStartIndex);
-//            routeToHome = adjustRoute(routeToHome, fullPath, startingDirectionToHome, returnHomeStartIndex);
 
             List<Integer> abRouteToConvey = generateAbsoluteDirections(routeToConvey, startingDirectionToConvey);
             List<Integer> abRouteToTarget = generateAbsoluteDirections(routeToTarget, startingDirectionToTarget);
@@ -386,9 +372,6 @@ public class AgentManager {
 
         for (int i = 0; i < path.size() - 1; i++) {
             Node currentNode = path.get(i);
-            if (i == 0) {
-                currentNode.setDirection(direction);
-            }
             Node nextNode = path.get(i + 1);
 
             int action = calculateAction(currentNode, nextNode);
