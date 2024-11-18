@@ -12,7 +12,6 @@ import UserView from '@/views/User/UserView.vue'
 import MonitoringView from '@/views/Monitoring/MonitoringView.vue' 
 
 import IncomeSection from '@/views/Dashboard/IncomeSection.vue'
-import TestView from '../views/RC_car/TestView.vue'
 
 const routes = [
   {
