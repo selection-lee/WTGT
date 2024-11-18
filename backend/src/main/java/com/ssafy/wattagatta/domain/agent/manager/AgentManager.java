@@ -50,6 +50,9 @@ public class AgentManager {
     @Value("${agent.move.duration.time}")
     private int MOVE_DURATION_TIME;
 
+    @Value("${agent.convey.duration.time}")
+    private int WAIT_CONVEYOR_TIME;
+
     @Value("${websocket.unity.path}")
     private String unityPath;
 
@@ -88,7 +91,7 @@ public class AgentManager {
             int conveyPathSize = conveyPath.getConveyPathSize();
 
             // 컨베이어 벨트까지 경로(대기 제외)
-            List<Node> conveyToPath = conveyPath.getPath().subList(0, conveyPathSize - TASK_DURATION_TIME);
+            List<Node> conveyToPath = conveyPath.getPath().subList(0, conveyPathSize - WAIT_CONVEYOR_TIME);
 
             // 컨베이어 벨트부터 타겟까지 경로(대기 제외)
             List<Node> conveyToTargetPath = conveyPath.getPath()
@@ -211,7 +214,7 @@ public class AgentManager {
         Node originalCurrentNode = agent.getCurrentNode();
 
         agent.setGoalNode(agent.getConveyNode());
-        List<Node> pathToConvey = pathCalcService.calcPath(agent, constraints);
+        List<Node> pathToConvey = pathCalcService.calcPath(agent, constraints, WAIT_CONVEYOR_TIME);
 
         if (pathToConvey == null) {
             agent.setStatus(AgentStatus.IDLE);
@@ -221,7 +224,7 @@ public class AgentManager {
         agent.setCurrentNode(agent.getConveyNode());
         agent.getCurrentNode().setDirection(Direction.NORTH);
         agent.setGoalNode(originalGoalNode);
-        List<Node> pathFromConveyToGoal = pathCalcService.calcPath(agent, constraints);
+        List<Node> pathFromConveyToGoal = pathCalcService.calcPath(agent, constraints, TASK_DURATION_TIME);
         if (pathFromConveyToGoal == null) {
             agent.setStatus(AgentStatus.IDLE);
             throw new CustomException(ErrorCode.CANNOT_FIND_NEW_PATH);
@@ -246,7 +249,7 @@ public class AgentManager {
         agent.setCurrentNode(agent.getGoalNode());
         agent.setGoalNode(agent.getHomeNode());
         agent.getCurrentNode().setDirection(Direction.SOUTH);
-        List<Node> returnPath = pathCalcService.calcPath(agent, constraints);
+        List<Node> returnPath = pathCalcService.calcPath(agent, constraints, TASK_DURATION_TIME);
         if (returnPath == null) {
             agent.setStatus(AgentStatus.IDLE);
             throw new CustomException(ErrorCode.CANNOT_FIND_NEW_PATH);

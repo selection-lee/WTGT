@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AStar {
 
-    public List<Node> findPath(Agent agent, List<Constraint> constraints) {
+    public List<Node> findPath(Agent agent, List<Constraint> constraints, int waitTime) {
         PriorityQueue<State> openList = new PriorityQueue<>();
         Map<StateKey, State> closedList = new HashMap<>();
         Node goalNode = agent.getGoalNode();
@@ -38,7 +38,7 @@ public class AStar {
             StateKey currentKey = StateKey.fromState(currentState);
 
             if (isGoalState(currentState, agent.getGoalNode())) {
-                return reconstructPath(currentState, 5);
+                return reconstructPath(currentState, waitTime);
             }
 
             closedList.put(currentKey, currentState);

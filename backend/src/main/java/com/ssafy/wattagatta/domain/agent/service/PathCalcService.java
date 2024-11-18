@@ -14,7 +14,7 @@ public class PathCalcService {
 
     private final AStar aStar;
 
-    public List<Node> calcPath(Agent agent, List<Constraint> constraints) {
-        return aStar.findPath(agent, constraints);
+    public List<Node> calcPath(Agent agent, List<Constraint> constraints, int waitTime) {
+        return aStar.findPath(agent, constraints, waitTime);
     }
 }
