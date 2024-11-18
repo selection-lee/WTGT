@@ -1,15 +1,15 @@
 package com.ssafy.wattagatta.domain.invoice.entity;
 
 import com.ssafy.wattagatta.global.common.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,8 +37,8 @@ public class RecipientEntity extends BaseEntity {
     @Column(name = "address", length = 100)
     private String address;
 
-    @OneToMany(mappedBy = "recipientEntity", fetch = FetchType.LAZY)
-    private Set<InvoiceEntity> invoiceEntities;
+    @OneToOne(mappedBy = "recipientEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private InvoiceEntity invoiceEntity;
 
     public static RecipientEntity defaultCreate() {
         RecipientEntity recipient = new RecipientEntity();
