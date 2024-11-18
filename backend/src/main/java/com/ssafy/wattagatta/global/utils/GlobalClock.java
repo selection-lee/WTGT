@@ -16,7 +16,6 @@ public class GlobalClock {
     @Scheduled(fixedRate = 1000)
     public void incrementGlobalTime() {
         globalTime++;
-        log.info("Global Time : {}", globalTime);
     }
 }
 

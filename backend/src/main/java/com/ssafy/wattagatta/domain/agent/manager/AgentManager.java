@@ -21,7 +21,6 @@ import com.ssafy.wattagatta.global.exception.ErrorCode;
 import com.ssafy.wattagatta.global.utils.GlobalClock;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +72,8 @@ public class AgentManager {
         startBatteryRechargeScheduler();
     }
 
-    public synchronized void assignTaskToAgent(Agent agent, ProductLoc productLoc, Consumer<ProductLoc> failureCallback) {
+    public synchronized void assignTaskToAgent(Agent agent, ProductLoc productLoc,
+                                               Consumer<ProductLoc> failureCallback) {
         try {
             TargetLoc targetLoc = productLoc.targetLoc();
             int currentGlobalTime = globalClock.getGlobalTime();
@@ -92,15 +92,12 @@ public class AgentManager {
             log.info("에이전트 {}의 경로: {}", agent.getId(), pathToTarget);
             log.info("에이전트 {}의 복귀 경로 : {}", agent.getId(), returnPath);
 
-            List<Constraint> constraints1 = pathStore.getConstraintsForAgent(agent.getId());
-            log.info("에이전트 {}의 constraints : {}", agent.getId(), constraints1);
-
             List<Node> fullPath = assignFullPathToAgent(agent, pathToTarget, returnPath);
 
             int requiredBattery = fullPath.size();
 
             // 배터리가 충분한 경우
-            if(agent.getBatteryLevel() > requiredBattery){
+            if (agent.getBatteryLevel() > requiredBattery) {
                 log.info("배터리 충분 : 현재 agent 배터리 : {} , 필요 배터리 : {}", agent.getBatteryLevel(), requiredBattery);
                 pathStore.savePath(agent.getId(), currentGlobalTime, fullPath);
                 log.info("에이전트 전체 설정 경로 : {}", agent.getCurrentPath());
@@ -129,12 +126,14 @@ public class AgentManager {
 
     /**
      * 배터리가 부족한 경우 충전 후 다시 실행 메서드
+     *
      * @param agent
      * @param productLoc
      * @param failureCallback
      * @param scheduledTime
      */
-    private void scheduleTaskAssignment(Agent agent, ProductLoc productLoc, Consumer<ProductLoc> failureCallback, int scheduledTime) {
+    private void scheduleTaskAssignment(Agent agent, ProductLoc productLoc, Consumer<ProductLoc> failureCallback,
+                                        int scheduledTime) {
         new Thread(() -> {
             try {
                 agent.setStatus(AgentStatus.PERFORMING_CHARGE);
@@ -302,6 +301,7 @@ public class AgentManager {
 
     /**
      * RC Car 메시지 전송 위한 메서드
+     *
      * @param agent
      * @param fullPath
      * @param conveyPathSize
@@ -420,6 +420,7 @@ public class AgentManager {
 
     /**
      * Rc car 방향 전환 고려한 경로
+     *
      * @param routeSegment
      * @param fullPath
      * @param desiredStartingDirection
@@ -427,7 +428,8 @@ public class AgentManager {
      * @return
      */
     private List<Integer> adjustRoute(
-            List<Integer> routeSegment, List<Node> fullPath, Direction desiredStartingDirection, int segmentStartIndex) {
+            List<Integer> routeSegment, List<Node> fullPath, Direction desiredStartingDirection,
+            int segmentStartIndex) {
 
         if (routeSegment.isEmpty() || segmentStartIndex >= fullPath.size() - 1) {
             return routeSegment;
@@ -448,11 +450,14 @@ public class AgentManager {
                     currentDirection = requiredDirection;
                 }
                 // 방향 전환 명령이 아니면 루프 종료
-                else break;
-
+                else {
+                    break;
+                }
             }
             // 원하는 방향으로 설정 완료
-            else break;
+            else {
+                break;
+            }
 
         }
 
@@ -461,6 +466,7 @@ public class AgentManager {
 
     /**
      * 절대 방향
+     *
      * @param routeSegment
      * @param startingDirection
      * @return
@@ -546,7 +552,6 @@ public class AgentManager {
                 || (current == Direction.SOUTH && next == Direction.WEST)
                 || (current == Direction.WEST && next == Direction.NORTH);
     }
-
 
 
 }
