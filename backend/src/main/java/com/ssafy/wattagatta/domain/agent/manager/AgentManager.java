@@ -310,30 +310,39 @@ public class AgentManager {
     private void sendAgentRoute(Agent agent, List<Node> fullPath, int conveyPathSize, int targetPathSize) {
         try {
             int carNumber = Integer.parseInt(agent.getId().replace("agent", ""));
-
-            List<Integer> routeActions = generateRouteActions(fullPath);
-
+//            List<Integer> routeActions = generateRouteActions(fullPath);
             int conveyWaitTime = TASK_DURATION_TIME;
             int targetWaitTime = TASK_DURATION_TIME;
             int homeWaitTime = TASK_DURATION_TIME;
 
-            int conveyPathEndIndex = conveyPathSize - 1 - conveyWaitTime;
+            int conveyPathEndIndex = conveyPathSize - conveyWaitTime;
             int targetPathStartIndex = conveyPathEndIndex + TASK_DURATION_TIME;
-            int targetPathEndIndex = targetPathSize - 1 - targetWaitTime;
+            int targetPathEndIndex = targetPathSize - targetWaitTime;
             int returnHomeStartIndex = targetPathEndIndex + TASK_DURATION_TIME;
-            int routeActionsSize = routeActions.size() - 1 - homeWaitTime;
+            int routeActionsSize = fullPath.size() - homeWaitTime;
 
-            List<Integer> routeToConvey = routeActions.subList(0, conveyPathEndIndex);
-            List<Integer> routeToTarget = routeActions.subList(targetPathStartIndex, targetPathEndIndex);
-            List<Integer> routeToHome = routeActions.subList(returnHomeStartIndex, routeActionsSize);
+            List<Node> routeToConveyNode = fullPath.subList(0, conveyPathEndIndex);
+            List<Node> routeToTargetNode = fullPath.subList(targetPathStartIndex, targetPathEndIndex);
+            List<Node> routeToHomeNode = fullPath.subList(returnHomeStartIndex, routeActionsSize);
+            log.info("routeToConveyNode : {}", routeToConveyNode);
+            log.info("routeToTargetNode : {}", routeToTargetNode);
+            log.info("routeToHomeNode : {}", routeToHomeNode);
+
+            List<Integer> routeToConvey = generateRouteActions(routeToConveyNode, Direction.EAST);
+            List<Integer> routeToTarget = generateRouteActions(routeToTargetNode, Direction.NORTH);
+            List<Integer> routeToHome = generateRouteActions(routeToHomeNode, Direction.SOUTH);
+
+//            List<Integer> routeToConvey = routeActions.subList(0, conveyPathEndIndex);
+//            List<Integer> routeToTarget = routeActions.subList(targetPathStartIndex, targetPathEndIndex);
+//            List<Integer> routeToHome = routeActions.subList(returnHomeStartIndex, routeActionsSize);
 
             Direction startingDirectionToConvey = agent.getCurrentDirection();
             Direction startingDirectionToTarget = Direction.NORTH;
             Direction startingDirectionToHome = Direction.SOUTH;
 
-            routeToConvey = adjustRoute(routeToConvey, fullPath, startingDirectionToConvey, 0);
-            routeToTarget = adjustRoute(routeToTarget, fullPath, startingDirectionToTarget, targetPathStartIndex);
-            routeToHome = adjustRoute(routeToHome, fullPath, startingDirectionToHome, returnHomeStartIndex);
+//            routeToConvey = adjustRoute(routeToConvey, fullPath, startingDirectionToConvey, 0);
+//            routeToTarget = adjustRoute(routeToTarget, fullPath, startingDirectionToTarget, targetPathStartIndex);
+//            routeToHome = adjustRoute(routeToHome, fullPath, startingDirectionToHome, returnHomeStartIndex);
 
             List<Integer> abRouteToConvey = generateAbsoluteDirections(routeToConvey, startingDirectionToConvey);
             List<Integer> abRouteToTarget = generateAbsoluteDirections(routeToTarget, startingDirectionToTarget);
@@ -372,18 +381,19 @@ public class AgentManager {
         }
     }
 
-    private List<Integer> generateRouteActions(List<Node> path) {
+    private List<Integer> generateRouteActions(List<Node> path, Direction direction) {
         List<Integer> routeActions = new ArrayList<>();
 
         for (int i = 0; i < path.size() - 1; i++) {
             Node currentNode = path.get(i);
+            if (i == 0) {
+                currentNode.setDirection(direction);
+            }
             Node nextNode = path.get(i + 1);
 
             int action = calculateAction(currentNode, nextNode);
             routeActions.add(action);
         }
-
-        routeActions.add(0);
 
         return routeActions;
     }
@@ -393,7 +403,14 @@ public class AgentManager {
         Direction nextDirection = nextNode.getDirection();
 
         if (currentDirection == nextDirection) {
-            return 1;
+            if (currentNode.getX() == nextNode.getX() && currentNode.getY() == nextNode.getY()) {
+                // x y 방향 같음 => 정지
+                return 0;
+            }
+            // 방향만 같음 => 직진
+            else {
+                return 1;
+            }
         } else if (isLeftTurn(currentDirection, nextDirection)) {
             return 2;
         } else if (isRightTurn(currentDirection, nextDirection)) {
@@ -458,7 +475,6 @@ public class AgentManager {
             else {
                 break;
             }
-
         }
 
         return routeSegment.subList(index, routeSegment.size());
