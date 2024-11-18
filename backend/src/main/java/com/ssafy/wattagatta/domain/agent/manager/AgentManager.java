@@ -367,8 +367,10 @@ public class AgentManager {
             return 1; // 직진
         } else if (isRightTurn(currentNode.getDirection(), nextNode.getDirection())) {
             return 2; // 우회전
-        } else {
+        } else if (isLeftTurn(currentNode.getDirection(), nextNode.getDirection())){
             return 0; // 좌회전
+        } else{
+            return 4; // 180 도
         }
     }
 
