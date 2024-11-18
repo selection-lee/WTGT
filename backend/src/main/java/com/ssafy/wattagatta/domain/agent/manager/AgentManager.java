@@ -82,6 +82,7 @@ public class AgentManager {
             // 작업 경로 계산
             List<Constraint> constraints = pathStore.getConstraintsForAgent(agent.getId());
 
+            agent.getCurrentNode().setDirection(Direction.EAST);
             ConveyPath conveyPath = calcAgentPathToTarget(agent, constraints);
             List<Node> pathToTarget = conveyPath.getPath();
             int conveyPathSize = conveyPath.getConveyPathSize();
@@ -91,7 +92,7 @@ public class AgentManager {
 
             // 컨베이어 벨트부터 타겟까지 경로(대기 제외)
             List<Node> conveyToTargetPath = conveyPath.getPath()
-                    .subList(conveyPathSize - 1, pathToTarget.size() - TASK_DURATION_TIME);
+                    .subList(conveyPathSize, pathToTarget.size() - TASK_DURATION_TIME);
 
             // 복귀 경로 계산
             List<Node> returnPath = calcAgentReturnPath(agent, constraints);
@@ -218,6 +219,7 @@ public class AgentManager {
         }
 
         agent.setCurrentNode(agent.getConveyNode());
+        agent.getCurrentNode().setDirection(Direction.NORTH);
         agent.setGoalNode(originalGoalNode);
         List<Node> pathFromConveyToGoal = pathCalcService.calcPath(agent, constraints);
         if (pathFromConveyToGoal == null) {
@@ -243,7 +245,7 @@ public class AgentManager {
     private List<Node> calcAgentReturnPath(Agent agent, List<Constraint> constraints) {
         agent.setCurrentNode(agent.getGoalNode());
         agent.setGoalNode(agent.getHomeNode());
-
+        agent.getCurrentNode().setDirection(Direction.SOUTH);
         List<Node> returnPath = pathCalcService.calcPath(agent, constraints);
         if (returnPath == null) {
             agent.setStatus(AgentStatus.IDLE);
