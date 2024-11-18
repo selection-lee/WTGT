@@ -11,12 +11,7 @@
                         <ul>
                             <li v-for="bot in botList" :key="bot.id" class="text-white-500 mb-1">
                                 {{ bot.name }}: <span
-                                    :class="{
-                                        'text-blue-500': bot.state === 'On the move',
-                                        'text-yellow-500': bot.state === 'Loading Items',
-                                        'text-green-500': bot.state === 'Charging',
-                                        'text-purple-500': bot.state === 'Unloading'
-                                    }">{{ bot.state
+                                    :class="bot.status === 'on' ? 'text-green-500' : 'text-red-500'">{{ bot.statusText
                                     }}</span>
                             </li>
                         </ul>
@@ -27,14 +22,7 @@
                         <h3 class="text-lg font-semibold mb-2">Bot State</h3>
                         <div v-for="bot in botList" :key="bot.id" class="mb-2">
                             <p class="text-yellow-500">{{ bot.name }}</p>
-                            <p>State: <span
-                                    :class="{
-                                        'text-blue-500': bot.state === 'On the move',
-                                        'text-yellow-500': bot.state === 'Loading Items',
-                                        'text-green-500': bot.state === 'Charging',
-                                        'text-purple-500': bot.state === 'Unloading'
-                                    }">{{ bot.state
-                                    }}</span></p>
+                            <p>State: {{ bot.state }}</p>
                             <p>Remaining Battery: {{ bot.battery }}%</p>
                         </div>
                     </div>
@@ -252,14 +240,6 @@ export default {
                 const botIndex = this.botList.findIndex(bot => bot.id === id);
                 if (botIndex === -1) return;
 
-                // Bot 상태 업데이트 함수 수정
-                const updateBotStatus = (newState) => {
-                    if (botIndex !== -1) {
-                        this.botList[botIndex].state = newState;
-                        // this.botList[botIndex].statusText = newState;  // statusText도 함께 업데이트
-                    }
-                };
-
                 // house_arrive가 true에서 false로 변경될 때
                 if (this.lastHouseArriveStates[id] && !data.house_arrive) {
                     this.samePositionCount[id] = 1;
@@ -268,91 +248,53 @@ export default {
                         ...data,
                         rc_car: this.initialPositions[id]
                     };
-                    // this.botList[botIndex].state = 'Charging';
-                    updateBotStatus('Charging'); 
-                }
-                // house_arrive가 false이고 이전 위치와 같은 경우 (초기 위치 유지를 위한 처리)
-                else if (!data.house_arrive && this.lastPositions[id] && 
-                        data.rc_car.x === this.lastPositions[id].x && 
-                        data.rc_car.z === this.lastPositions[id].z &&
-                        this.samePositionCount[id] > 0) {
-                    this.samePositionCount[id]++;
-                    if (this.samePositionCount[id] >= 5) {
-                        this.resetComplete[id] = true;
-                    }
-                    // 이 경우 rcCarData 업데이트 하지 않음 (초기 위치 유지)
+                    this.botList[botIndex].state = 'Charging';
                 }
                 // convey_arrive true로 변경될 때
                 else if (!this.lastConveyArriveStates[id] && data.convey_arrive) {
                     this.stateChangeCount[id] = 0;
                     this.loadingComplete[id] = false;
-                    this.rcCarData[id] = data;
                 }
                 // convey_arrive true에서 false로 변경될 때
                 else if (this.lastConveyArriveStates[id] && !data.convey_arrive) {
                     this.stateChangeCount[id] = 1;
-                    // this.botList[botIndex].state = 'Loading Items';
-                    updateBotStatus('Loading Items'); 
-                    this.rcCarData[id] = data;
+                    this.botList[botIndex].state = 'Loading Items';
                 }
                 // arrive true로 변경될 때
                 else if (!this.lastArriveStates[id] && data.arrive) {
                     this.stateChangeCount[id] = 0;
                     this.unloadingComplete[id] = false;
-                    this.rcCarData[id] = data;
                 }
                 // arrive true에서 false로 변경될 때
                 else if (this.lastArriveStates[id] && !data.arrive) {
                     this.stateChangeCount[id] = 1;
-                    // this.botList[botIndex].state = 'Unloading';
-                    updateBotStatus('Unloading'); 
-                    this.rcCarData[id] = data;
+                    this.botList[botIndex].state = 'Unloading';
                 }
                 // 상태 변화 후 같은 위치가 계속 들어올 때
-                // else if (this.lastPositions[id] && 
-                //         data.rc_car.x === this.lastPositions[id].x && 
-                //         data.rc_car.z === this.lastPositions[id].z) {
-                //     // Charging 상태에서의 카운트
-                //     if (this.samePositionCount[id] > 0) {
-                //         this.samePositionCount[id]++;
-                //         if (this.samePositionCount[id] >= 5) {
-                //             this.resetComplete[id] = true;
-                //         }
-                //     }
-                //     // Loading/Unloading 상태에서의 카운트
-                //     if (this.stateChangeCount[id] > 0) {
-                //         this.stateChangeCount[id]++;
-                //         if (this.stateChangeCount[id] >= 5) {
-                //             if (this.botList[botIndex].state === 'Loading Items') {
-                //                 this.loadingComplete[id] = true;
-                //                 this.botList[botIndex].state = 'On the move';
-                //             } else if (this.botList[botIndex].state === 'Unloading') {
-                //                 this.unloadingComplete[id] = true;
-                //                 this.botList[botIndex].state = 'On the move';
-                //             }
-                //             this.stateChangeCount[id] = 0;
-                //         }
-                //         this.rcCarData[id] = data;
-                //     }
-                // }
-                // Loading/Unloading 상태에서 같은 위치가 계속 들어올 때
-                else if (this.stateChangeCount[id] > 0 && this.lastPositions[id] && 
+                else if (this.lastPositions[id] && 
                         data.rc_car.x === this.lastPositions[id].x && 
                         data.rc_car.z === this.lastPositions[id].z) {
-                    this.stateChangeCount[id]++;
-                    if (this.stateChangeCount[id] >= 5) {
-                        if (this.botList[botIndex].state === 'Loading Items') {
-                            this.loadingComplete[id] = true;
-                            // this.botList[botIndex].state = 'On the move';
-                            updateBotStatus('On the move'); 
-                        } else if (this.botList[botIndex].state === 'Unloading') {
-                            this.unloadingComplete[id] = true;
-                            // this.botList[botIndex].state = 'On the move';
-                            updateBotStatus('On the move'); 
+                    // Charging 상태에서의 카운트
+                    if (this.samePositionCount[id] > 0) {
+                        this.samePositionCount[id]++;
+                        if (this.samePositionCount[id] >= 5) {
+                            this.resetComplete[id] = true;
                         }
-                        this.stateChangeCount[id] = 0;
                     }
-                    this.rcCarData[id] = data;
+                    // Loading/Unloading 상태에서의 카운트
+                    if (this.stateChangeCount[id] > 0) {
+                        this.stateChangeCount[id]++;
+                        if (this.stateChangeCount[id] >= 5) {
+                            if (this.botList[botIndex].state === 'Loading Items') {
+                                this.loadingComplete[id] = true;
+                                this.botList[botIndex].state = 'On the move';
+                            } else if (this.botList[botIndex].state === 'Unloading') {
+                                this.unloadingComplete[id] = true;
+                                this.botList[botIndex].state = 'On the move';
+                            }
+                            this.stateChangeCount[id] = 0;
+                        }
+                    }
                 }
                 // 새로운 좌표가 들어올 때
                 else if (!this.lastPositions[id] || 
@@ -362,18 +304,13 @@ export default {
                     if (this.resetComplete[id]) {
                         this.resetComplete[id] = false;
                         this.samePositionCount[id] = 0;
-                        // this.botList[botIndex].state = 'On the move';
-                        updateBotStatus('On the move'); 
+                        this.botList[botIndex].state = 'On the move';
                     }
                     // Loading/Unloading 완료 후 새로운 좌표
                     else if (!data.convey_arrive && !data.arrive && 
                            (this.loadingComplete[id] || this.unloadingComplete[id])) {
-                        // this.botList[botIndex].state = 'On the move';
-                        updateBotStatus('On the move'); 
+                        this.botList[botIndex].state = 'On the move';
                     }
-                    this.rcCarData[id] = data;
-                }
-                else {
                     this.rcCarData[id] = data;
                 }
 
@@ -389,6 +326,13 @@ export default {
                 if (data.battery_status !== undefined) {
                     this.botList[botIndex].battery = data.battery_status;
                 }
+                // if (data.convey_arrive==true or ...) {
+                //     count ++
+                //     if count === 5 {
+                //         // status 를 on the move 
+
+                //     }
+                // }
             };
 
             this.webSocket.onerror = (error) => {
