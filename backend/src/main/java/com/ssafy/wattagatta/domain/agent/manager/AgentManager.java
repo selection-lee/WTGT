@@ -187,7 +187,7 @@ public class AgentManager {
                     if (i == fullPath.size() - (TASK_DURATION_TIME + 1)) {
                         houseArrived = true;
                     }
-                    if (i == conveyPathSize - (TASK_DURATION_TIME + 1)) {
+                    if (i == conveyPathSize - (WAIT_CONVEYOR_TIME + 1)) {
                         conveyArrived = true;
                     }
 
