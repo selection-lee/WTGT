@@ -1,0 +1,46 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: wattagatta
+  rabbitmq:
+    port: 5672
+    username: guest
+    password: guest
+    host: rabbitmq
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+  data:
+    redis:
+      port: 6379
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+    show-sql: true
+
+  jwt:
+    secret: ${JWT_SECRET_KEY}
+
+agent:
+  task:
+    duration:
+      time: 5
+  move:
+    duration:
+      time: 1
+
+websocket:
+  unity:
+    path: /ws/rccar
+
+      

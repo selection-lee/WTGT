@@ -1,0 +1,17 @@
+INSERT INTO area (area_name, base_sector)
+VALUES ('SEOUL', 'A'),
+       ('BUSAN', 'B'),
+       ('DAEJEON', 'C'),
+       ('GYEONGSANGBUK', 'D'),
+       ('GWANGJU', 'E'),
+       ('INCHEON', 'F'),
+       ('DAEGU', 'G'),
+       ('GYEONGGI', 'H'),
+       ('GANGWON', 'I'),
+       ('GYEONGSANGNAM', 'J'),
+       ('ULSAN', 'K'),
+       ('JEONLANAM', 'L'),
+       ('JEONLABUK', 'M'),
+       ('CHUNGCHEONGNAM', 'N'),
+       ('CHUNGCHEONGBUK', 'O'),
+       ('JEJU', 'P');
