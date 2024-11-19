@@ -1,0 +1,480 @@
+using System;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Net.WebSockets;
+using UnityEngine;
+using System.Collections;
+
+public class MoveTest : MonoBehaviour
+{
+    private ClientWebSocket ws;
+    //public GameObject RCcar1;  // 첫 번째 Cube를 Inspector에서 지정
+    //public GameObject RCcar2;  // 두 번째 Cube를 Inspector에서 지정
+
+    public GameObject[] RCCars;
+    public GameObject[] Boxs;
+    // public GameObject Boxs; // 이 변수는 Inspector에서 할당되어야 합니다.
+    public GameObject boxPrefab; // 프리팹을 위한 변수
+
+    public float rotationSpeed = 1.0f;  // 회전 속도
+    public float moveSpeed = 1.0f;      // 이동 속도
+
+    private Vector3[] targetBoxPositions = new Vector3[3];
+    private Quaternion[] targetRotations = new Quaternion[3];
+    private Vector3[] targetPositions = new Vector3[3];
+    private Vector3[] previousPositions = new Vector3[3];
+    private bool[] arriveFlags = new bool[3];
+    private bool[] conveyFlags = new bool[3];
+    private bool[] ChargeArriveFlags = new bool[3];
+    private bool[] carryBoxFlags = new bool[3];
+    private int[] previousAngles = new int[3];
+
+    int[,] visited = new int[4, 16]; // 3x4 크기의 2차원 배열
+
+    //private Quaternion targetRotation1;  // 목표 회전
+    //private Quaternion targetRotation2;  // 목표 회전
+
+    //private Vector3 targetPosition1;     // 목표 위치
+    //private Vector3 targetPosition2;     // 목표 위치
+    private bool isRotating = true;     // 회전 중인지 여부
+    private bool isMoving = false;      // 이동 중인지 여부
+    private bool isBoxMoving = false;   // 적재 이동 중인지 여부
+    private string boxmsg = null;
+
+    //private Vector3 previousPosition1;  // 이전 위치
+    //private Vector3 previousPosition2;  // 이전 위치
+    //private int previousAngle1;         // 이전 각도
+    //private int previousAngle2;         // 이전 각도
+
+    private float moveStartTime;  // 이동 시작 시간
+    private float moveDuration = 10.0f;  // 이동 완료까지 걸릴 시간 (초 단위)
+
+    [System.Serializable]
+    public class CarCoordinates
+    {
+        public int rc_car_id;
+        public Vector3 rc_car;
+        public int rc_car_angle;
+        public bool arrive;
+        public bool convey_arrive;
+        public bool house_arrive;
+        public int battery_status;
+    }
+
+    [System.Serializable]
+    public class addPos
+    {
+        public string add_pos;
+    }
+
+    void Start()
+    {
+        ConnectToWebSocket();
+    }
+
+    void CreateBoxAtPosition(int rccar, Vector3 position)
+    {
+        // 이미 실었다면 리턴
+        if (carryBoxFlags[rccar - 1]) return;
+
+        GameObject box = Instantiate(boxPrefab, position, Quaternion.identity); // 프리팹 인스턴스화
+        Boxs[rccar - 1] = box;
+        box.transform.localScale = new Vector3(8.894794f, 8.894794f, 8.894794f); // 원하는 크기로 조정 가능
+        // RC카 위로 올라가게 높이 수정
+        position.y = 0.5f;
+        box.transform.position = position;
+
+        // Material 설정
+        //Material boxMaterial = new Material(Shader.Find("Standard")); // 기본 셰이더 사용
+        //boxMaterial.color = Color.red; // 원하는 색상으로 설정 (예: 빨간색)
+        //box.GetComponent<Renderer>().material = boxMaterial;
+
+        box.transform.parent = RCCars[rccar - 1].transform;
+        carryBoxFlags[rccar - 1] = true;
+    }
+
+    private (Vector3 Position, char Sector, int I, int J) FindBoxPosition(Vector3 position)
+    {
+        // Box가 이동할 위치를 구한다
+        // visited함수에서 1이 아닌 공간은 비어있는 공간이다
+        // 따라서 현재 하역장에 맞는 인덱스 안에서 빈공간을 찾는다
+        // 왼쪽 위부터 오른쪽 아래까지 반복문으로 판단
+        //Debug.Log("z,x : " + position.x + ", " + position.z);
+
+        // 우선 지금 RC카가 있는 위치를 좌표값으로 반환
+        float x_value = (position.x - 41.5f) / (-9.5f);
+        float z_value = (position.z + 36.25f) / 9.5f;
+
+        //Vector3 BoxPosition = position;
+        Vector3 frStartPosition = new Vector3(-42.5325f, 13.48f, -38.0f);
+        Vector3 seStartPosition = new Vector3(-42.5325f, 13.48f, 10.0f);
+
+        // 이미 도착했을때 이 함수로 들어온 것이므로
+        // visited 인덱스만 파악하면 된다.
+
+        char sector = '\0';
+
+        // z_value 값에 따라 sector 값 지정
+        if (z_value >= 0 && z_value <= 3)
+        {
+            sector = (char)('A' + Mathf.RoundToInt(z_value));
+        }
+        else if (z_value >= 5 && z_value <= 8)
+        {
+            sector = (char)('E' + Mathf.RoundToInt(z_value - 5));
+        }
+
+
+        if (z_value != 4.0f)
+        {
+            // 첫번째 shelf 적재
+            if (z_value <= 3.0f)
+            {
+                int st = Mathf.RoundToInt(2 * z_value);
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = st; j <= st + 1; j++)
+                    {
+                        if (visited[i, j] == 1) continue;
+
+                        visited[i, j] = 1;
+                        frStartPosition.y -= 4.1f * i;
+                        frStartPosition.z += 4.75f * j;
+
+                        // Debug.Log(frStartPosition.x + " " + frStartPosition.y + " " + frStartPosition.z);
+                        return (frStartPosition, sector, i, j);
+                    }
+                }
+            }
+
+            // 두번째 shelf 적재
+            else
+            {
+                int st = Mathf.RoundToInt(2 * z_value - 2);
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = st; j <= st + 1; j++)
+                    {
+                        if (visited[i, j] == 1) continue;
+
+                        visited[i, j] = 1;
+                        seStartPosition.y -= 4.1f * i;
+                        seStartPosition.z += 4.75f * j;
+
+                        return (seStartPosition, sector, i, j);
+                    }
+                }
+            }
+        }
+        return (Vector3.zero, 'X', -1, -1);
+    }
+
+    // RC카 충전소 도착 함수
+    void ArrivetoCharge(int rccar, Vector3 position)
+    {
+        // 180도 회전 진행
+        isRotating = true;
+        int index = rccar - 1;
+        //targetRotations[index] = RCCars[index].transform.rotation * Quaternion.Euler(0, -180, 0);
+        Transform carTransform = RCCars[index].transform; // RC카의 Transform 가져오기
+
+        // 현재 RC카의 회전 각도 가져오기 (Y축 기준)
+        float currentYRotation = carTransform.eulerAngles.y;
+
+        // 목표 회전 각도: 동쪽 (90도)
+        float targetYRotation = 0f;
+
+        // 각도 차이 계산
+        float angleDifference = Mathf.DeltaAngle(currentYRotation, targetYRotation);
+
+        // 동쪽으로 회전하도록 Quaternion 설정
+        isRotating = true; // 회전 플래그 활성화
+        targetRotations[index] = carTransform.rotation * Quaternion.Euler(0, angleDifference, 0);
+
+    }
+
+    // RC카 도착 함수
+    void ArrivetoShelf(int rccar, Vector3 position)
+    {
+        // 180도 회전 진행
+        isRotating = true;
+
+        int index = rccar - 1;
+
+        // RC카의 자식으로 있는 박스를 찾기
+        Transform boxTransform = null;
+        // 상자를 떨구고
+
+        boxTransform = RCCars[index].transform.Find("Box_2(Clone)");
+        arriveFlags[index] = false;
+
+        if (boxTransform != null)
+        {
+            // 여기서 박스 적재 위치를 파악하는 함수로 들어간다
+            var result = FindBoxPosition(position);
+
+            Vector3 boxposition = result.Position;
+
+            if (boxposition != Vector3.zero)
+            {
+                //Debug.Log("박스위치 : " + boxposition);
+                boxTransform.SetParent(null);
+                targetBoxPositions[index] = boxposition;
+
+                boxmsg = result.Sector + "(" + result.I + ", " + result.J + ")";
+
+                isBoxMoving = true;
+
+                // 박스를 특정 위치로 이동
+                //boxTransform.position = new Vector3(boxposition.x, boxposition.y, boxposition.z); // Y 값을 1로 설정
+                boxTransform.position = boxposition;
+                Debug.Log($"Box for RC car {rccar} moved to position: {position}");
+            }
+            else
+            {
+                Debug.Log("All stave!!");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"No box found for RC car {rccar}.");
+        }
+
+        //targetRotations[index] = RCCars[index].transform.rotation * Quaternion.Euler(0, -180, 0);
+        carryBoxFlags[index] = false;
+    }
+
+    async void ConnectToWebSocket()
+    {
+        ws = new ClientWebSocket();
+        Uri serverUri = new Uri("ws://k11c208.p.ssafy.io:8081/ws/rccar");
+        // ws://k11c208.p.ssafy.io:8080/ws/rccar
+        // ws://localhost:8765
+        try
+        {
+            await ws.ConnectAsync(serverUri, CancellationToken.None);
+            Debug.Log("Connected to WebSocket server");
+            await ReceiveMessages();
+            /*Debug.Log("boxmsg : " + boxmsg);
+            if (boxmsg != null)
+            {
+                Debug.Log("SendData!!");
+                await SendData();
+            }*/
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to connect to WebSocket: {ex.Message}");
+        }
+    }
+
+    async Task ReceiveMessages()
+    {
+        var buffer = new byte[4096];
+        while (ws.State == WebSocketState.Open)
+        {
+            // 박스 적재 정보가 있으면 송신 진행
+            if (boxmsg != null)
+            {
+                // JSON 문자열로 변환할 객체 생성
+                var boxData = new addPos { add_pos = boxmsg };
+                string jsonData = JsonUtility.ToJson(boxData);
+                var byteArray = Encoding.UTF8.GetBytes(jsonData);
+                var segment = new ArraySegment<byte>(byteArray);
+
+                // WebSocket 메시지 송신
+                await ws.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
+                Debug.Log($"Sending JSON data: {jsonData}");
+                boxmsg = null;  // 송신 후 초기화
+            }
+
+
+            WebSocketReceiveResult result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+            // Debug.Log("test : " + message);
+            CarCoordinates coordinates = JsonUtility.FromJson<CarCoordinates>(message);
+            // Debug.Log($"coordinate: {coordinates.rc_car_id} + {coordinates.arrive}\n");
+
+            // 좌표 변환 함수
+            Vector3 TransformPosition(Vector3 originalPosition)
+            {
+                float new_x = 41.5f + (-9.5f * originalPosition.x);
+                float new_z = -36.25f + (9.5f * originalPosition.z);
+
+                Vector3 newposition = new Vector3(new_x, -2, new_z);
+
+                //Debug.Log("new_x, new_z : "+ new_x + "," + new_z);
+
+                return newposition;
+            }
+
+            int idNum = coordinates.rc_car_id - 1;
+
+            if (coordinates.rc_car != previousPositions[idNum] || coordinates.rc_car_angle != previousAngles[idNum])
+            {
+                previousPositions[idNum] = coordinates.rc_car;
+                previousAngles[idNum] = coordinates.rc_car_angle;
+
+                // RC1 회전 설정
+                switch (previousAngles[idNum])
+                {
+                    case 0:
+                        targetRotations[idNum] = RCCars[idNum].transform.rotation * Quaternion.Euler(0, -90, 0);
+                        break;
+                    case 2:
+                        targetRotations[idNum] = RCCars[idNum].transform.rotation * Quaternion.Euler(0, 90, 0);
+                        break;
+                    case 1:
+                        targetRotations[idNum] = RCCars[idNum].transform.rotation;
+                        break;
+                    case 4:
+                        targetRotations[idNum] = RCCars[idNum].transform.rotation * Quaternion.Euler(0, 180, 0);
+                        break;
+                }
+
+                //Debug.Log("rc_car: "+coordinates.rc_car);
+                targetPositions[idNum] = TransformPosition(coordinates.rc_car);
+                arriveFlags[idNum] = coordinates.arrive;
+                conveyFlags[idNum] = coordinates.convey_arrive;
+                ChargeArriveFlags[idNum] = coordinates.house_arrive;
+                Debug.Log("Arrive_first? : " + arriveFlags[0] + "\nArrive_second? :" + arriveFlags[1]);
+                //Debug.Log("first? : " + targetPositions[0] + "\nsecond? :" + targetPositions[1]);
+                
+
+                // 플래그 초기화
+                isRotating = true;
+                isMoving = false;
+            }
+
+            await Task.Delay(10);  // 불필요한 CPU 사용을 줄이기 위한 짧은 대기
+        }
+    }
+
+    void Update()
+    {
+        // RCcar1과 RCcar2가 할당되었는지 확인
+        if (RCCars[0] == null || RCCars[1] == null)
+        {
+            if (RCCars[0] == null)
+            {
+                Debug.LogError("No RCcar1");
+            }
+            if (RCCars[1] == null)
+            {
+                Debug.LogError("No RCcar2");
+            }
+            return; // 이후 코드 실행 중단
+        }
+
+        if (isBoxMoving)
+        {
+            float t = (Time.time - moveStartTime) / moveDuration;
+            bool allBoxMoveComplete = true;
+
+            for (int i = 0; i < Boxs.Length; i++)
+            {
+                if (Boxs[i] == null) continue;
+                // Debug.Log("target: " + targetBoxPositions[i]);
+                Boxs[i].transform.position = Vector3.Lerp(Boxs[i].transform.position, targetBoxPositions[i], t);
+
+                if (Vector3.Distance(Boxs[i].transform.position, targetBoxPositions[i]) >= 0.1f)
+                {
+                    allBoxMoveComplete = false;
+                }
+            }
+            
+            if (allBoxMoveComplete)
+            {
+                // Debug.Log("적재완료!");
+                isBoxMoving = false;
+            }
+        }
+
+        if (isRotating)
+        {
+            bool allRotationsComplete = true;
+            for (int i = 0; i < RCCars.Length; i++)
+            {
+                RCCars[i].transform.rotation = Quaternion.RotateTowards(RCCars[i].transform.rotation, targetRotations[i], rotationSpeed * Time.deltaTime * 100);
+
+                // 회전이 완료되지 않은 RC 카가 하나라도 있으면 false로 설정
+                if (Quaternion.Angle(RCCars[i].transform.rotation, targetRotations[i]) >= 0.1f)
+                {
+                    allRotationsComplete = false;
+                }
+            }
+            // 모든 RC 카의 회전이 완료되었을 때만 isRotating과 isMoving 설정
+            if (allRotationsComplete)
+            {
+                isRotating = false;
+                isMoving = true;
+                isBoxMoving = false;
+                moveStartTime = Time.time;
+            }
+        }
+
+        if (isMoving)
+        {
+            float t = (Time.time - moveStartTime) / moveDuration;
+            bool allMoveComplete = true;
+            for (int i = 0; i < RCCars.Length; i++)
+            {
+                // Debug.Log("거리 판단 반복문 !!");
+                RCCars[i].transform.position = Vector3.Lerp(RCCars[i].transform.position, targetPositions[i], t);
+
+                if (Vector3.Distance(RCCars[i].transform.position, targetPositions[i]) >= 0.1f)
+                {
+                    //Debug.Log(i + 1 + " 번째 차량은 아직 도착하지 않음");
+                    allMoveComplete = false;
+                }
+            }
+
+            if (allMoveComplete)
+            {
+                isMoving = false;
+                // 이동이 완료된 후 상자를 생성
+
+                for (int i = 0; i < RCCars.Length; i++)
+                {
+/*                    if (targetPositions[i].x == 41.5f && targetPositions[i].z == -26.75f)
+                    {
+                        CreateBoxAtPosition(i + 1, targetPositions[i]);
+                    }*/
+                    if (conveyFlags[i])
+                    {
+                        CreateBoxAtPosition(i + 1, targetPositions[i]);
+                    }
+                    if (arriveFlags[i])
+                    {
+                        ArrivetoShelf(i + 1, targetPositions[i]);
+                    }
+                    if (ChargeArriveFlags[i])
+                    {
+                        ArrivetoCharge(i + 1, targetPositions[i]);
+                    }
+                }
+            }
+        }
+    }
+
+    private async void OnApplicationQuit()
+    {
+        if (ws != null)
+        {
+            try
+            {
+                await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+                Debug.Log("WebSocket closed");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError("Error while closing WebSocket: " + ex.Message);
+            }
+            finally
+            {
+                ws.Dispose();
+            }
+        }
+    }
+}
