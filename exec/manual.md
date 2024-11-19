@@ -6,7 +6,7 @@
 
 ## 1-1. 프로젝트 개요
 
-- 물류 허브 자동화
+- 물류 허브 자동화 프로젝트
 
 ## 1-2. 개발 환경
 
@@ -192,6 +192,13 @@ export default {
 }
 ```
 
+### 2-2-4. .env
+```
+VITE_API_URL=http://k11c208.p.ssafy.io:8080/api
+VITE_DISABLE_AUTH=false
+VITE_SOCKET_URL=ws://k11c208.p.ssafy.io:8081/ws
+```
+
 # 3. 배포
 
 ---
@@ -249,6 +256,14 @@ services:
 volumes: 
   mysql_data:
     name: mysql_data
+```
+
+### 3-1-2. .env
+```
+MYSQL_DATABASE=wattagatta
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=1234
+JWT_SECRET_KEY=DZgFmpdzhmPKTpIWbNnCj2zGuPY9Gr0Kp0CwW40k07s
 ```
 
 ### 3-1-2. Nginx 설정
