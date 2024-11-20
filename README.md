@@ -34,10 +34,10 @@
 | <img width="160px" src="https://github.com/sonngneee.png" /> | <img width="160px" src="https://github.com/gnsals0904.png" /> | <img width="160px" src="https://github.com/selection-lee.png" /> |
 |                        AGV 제어 및 통신 설계                        |                        주행 알고리즘 구현<br>서버 개발                        |                       인프라 및 회원 인증<br>프론트엔드                       |
 
-|             [이택규](https://github.com/taekg)              |[김채민](https://github.com/chaemani223)|                  [윤의웅](https://github.com/NickNmaeisntavailable)                   |                                                                                                               
+|             [이택규](https://github.com/taekg)              |             [김채민](https://github.com/chaemani223)              |                  [윤의웅](https://github.com/NickNmaeisntavailable)                   |                                                                                                               
 |:--------------------------------------------------------:|:--------------------------------------------------------------:|:------------------------------------------------------------------------:| 
 | <img width="160px" src="https://github.com/taekg.png" /> | <img width="160px" src="https://github.com/chaemani223.png" /> | <img width="160px" src="https://github.com/NickNmaeisntavailable.png" /> |
-|              Unity 시뮬레이터 개발<br>BLE 서버 아키텍쳐 설계               |                        AGV 제어 및 하드웨어 설계                        |                              Vision AI, OCR                              |
+|              Unity 시뮬레이터 개발<br>BLE 서버 아키텍쳐 설계               |                         AGV 제어<br>하드웨어 설계                         |                              Vision AI, OCR                              |
 
 <br>
 <br>
