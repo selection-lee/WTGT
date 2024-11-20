@@ -29,15 +29,15 @@
 
 ## 팀 소개
 
-|                             김송은👑                              |                             김훈민                             |                            이정하                             |                                                                                                               
-|:------------------------------------------------------------:|:-----------------------------------------------------------:|:----------------------------------------------------------:| 
+|            [김송은👑](https://github.com/sonngneee)             |             [김훈민](https://github.com/gnsals0904)              |             [이정하](https://github.com/ZXLeeChris)              |                                                                                                               
+|:------------------------------------------------------------:|:-------------------------------------------------------------:|:-------------------------------------------------------------:| 
 | <img width="160px" src="https://github.com/sonngneee.png" /> | <img width="160px" src="https://github.com/gnsals0904.png" /> | <img width="160px" src="https://github.com/ZXLeeChris.png" /> |
-|          [@sonngneee](https://github.com/sonngneee)          |          [@gnsals0904](https://github.com/gnsals0904)           |           [@ZXLeeChris](https://github.com/ZXLeeChris)           |
+|                        AGV 제어 및 통신 설계                        |                      주행 알고리즘 구현 및 서버 개발                       |                    인프라, 회원 인증 및 프론트엔드                     |
 
-|                              이택규                              |                              김채민                              |                             윤의웅                             |                                                                                                               
-|:-------------------------------------------------------------:|:-------------------------------------------------------------:|:-----------------------------------------------------------:| 
+|[이택규](https://github.com/taekg)|[김채민](https://github.com/chaemani223)|                  [윤의웅](https://github.com/NickNmaeisntavailable)                   |                                                                                                               
+|:--------------------------------------------------------:|:--------------------------------------------------------------:|:------------------------------------------------------------------------:| 
 | <img width="160px" src="https://github.com/taekg.png" /> | <img width="160px" src="https://github.com/chaemani223.png" /> | <img width="160px" src="https://github.com/NickNmaeisntavailable.png" /> |
-|         [@taekg](https://github.com/taekg)          |         [@chaemani223](https://github.com/chaemani223)          |          [@NickNmaeisntavailable](https://github.com/NickNmaeisntavailable)           |
+|             Unity 시뮬레이터 개발 및 BLE 서버 아키텍쳐 설계              |                        AGV 제어 및 하드웨어 설계                        |                              Vision AI, OCR                              |
 
 <br>
 <br>
@@ -72,7 +72,15 @@
 <img src="https://img.shields.io/badge/Spring Data Jpa-6DB33F?style=for-the-badge&logo=Spring Data Jpa&logoColor=white"><img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white"><img src="https://img.shields.io/badge/Rabbit mq-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white"><br/>
 <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white"><br/>
 
+### 임베디드
 
+<img src="https://img.shields.io/badge/c++-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white">
+<img src="https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=c-sharp&logoColor=white"/>
+<img src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54"/><br/>
+<img src="https://img.shields.io/badge/arduino-00878F?style=for-the-badge&logo=arduino&logoColor=white">
+<img src="https://img.shields.io/badge/unity-23000000.svg?style=for-the-badge&logo=unity&logoColor=white"/><br/>
+<img src="https://img.shields.io/badge/bluetooth-0082FC?style=for-the-badge&logo=bluetooth&logoColor=white">
+<img src="https://img.shields.io/badge/socketdotio-010101?style=for-the-badge&logo=socketdotio&logoColor=white">
 
 <br>
 
@@ -116,19 +124,28 @@
 
 ## 화면 구성
 
-- 추후 추가 예정
+### RC카 관제 화면
+<img src="img/RCCarDashboard.gif" alt="image">
+<br/>
+
+### 적재 내역 화면
+<img src="img/web2.png" alt="image"">
 <br/>
 
 ## RC카
 ### 완성된 RC카
-<img src="img/rcCarTwice.gif" alt="image">
+<img src="img/rcCarTwice.gif" alt="image" width="50%">
 
 ### RC카 라인트레이싱 주행
 <img src="img/move_with_convey.gif" alt="image">
+<br/>
 <img src="img/move_nearby.gif" alt="image">
 
-### 프론트엔드 관제 화면
-<img src="img/RCCarDashboard.gif" alt="image">
+
+## Unity
+### 관제 화면
+<img src="img/unity.gif" alt="image">
+
 
 ### ERD
 
