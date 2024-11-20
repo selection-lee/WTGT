@@ -108,6 +108,9 @@
 
 <img src="https://img.shields.io/badge/Amazon%20EC2-FF9900?style=for-the-badge&logo=Amazon%20EC2&logoColor=white"><img src="https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white">
 
+## 아키텍쳐 구조도
+
+----
 ### 웹 아키텍쳐 구조도
 
 <img src="img/archi.PNG" alt="image">
