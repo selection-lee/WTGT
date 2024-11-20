@@ -31,7 +31,7 @@
 
 |            [김송은👑](https://github.com/sonngneee)             |             [김훈민](https://github.com/gnsals0904)              |            [이정하](https://github.com/selection-lee)            |                                                                                                               
 |:------------------------------------------------------------:|:-------------------------------------------------------------:|:-------------------------------------------------------------:| 
-| <img width="160px" src="https://github.com/sonngneee.png" /> | <img width="160px" src="https://github.com/gnsals0904.png" /> | <img width="160px" src="https://github.com/ZXLeeChris.png" /> |
+| <img width="160px" src="https://github.com/sonngneee.png" /> | <img width="160px" src="https://github.com/gnsals0904.png" /> | <img width="160px" src="https://github.com/selection-lee.png" /> |
 |                        AGV 제어 및 통신 설계                        |                      주행 알고리즘 구현 및 서버 개발                       |                      인프라, 회원 인증 및 프론트엔드                       |
 
 |[이택규](https://github.com/taekg)|[김채민](https://github.com/chaemani223)|                  [윤의웅](https://github.com/NickNmaeisntavailable)                   |                                                                                                               
@@ -129,7 +129,7 @@
 <br/>
 
 ### 적재 내역 화면
-<img src="img/web2.png" alt="image"">
+<img src="img/web2.png" alt="image">
 <br/>
 
 ## RC카
